@@ -38,4 +38,28 @@ public class ReservationCreateRequestDto {
     public String getRequestMemo() {
         return requestMemo;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setReservationDate(LocalDate reservationDate) {
+        this.reservationDate = reservationDate;
+    }
+
+    public void setReservationTime(LocalTime reservationTime) {
+        this.reservationTime = reservationTime;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public void setRequestMemo(String requestMemo) {
+        this.requestMemo = requestMemo;
+    }
 }
