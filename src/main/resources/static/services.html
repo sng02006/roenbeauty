@@ -28,7 +28,6 @@ body {
     margin: 0 auto;
 }
 
-/* header */
 header {
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(6px);
@@ -66,7 +65,6 @@ nav a.active {
     font-weight: 600;
 }
 
-/* hero */
 .page-hero {
     padding: 70px 0 36px;
     text-align: center;
@@ -86,7 +84,6 @@ nav a.active {
     margin: 0 auto;
 }
 
-/* brand */
 .brand-box {
     display: flex;
     justify-content: center;
@@ -120,7 +117,6 @@ nav a.active {
     margin: 10px auto 12px;
 }
 
-/* menu layout */
 .menu-section {
     padding-bottom: 90px;
 }
@@ -202,7 +198,15 @@ nav a.active {
     color: #6e665f;
 }
 
-/* button */
+.loading-message,
+.empty-message,
+.error-message {
+    text-align: center;
+    color: #6f665f;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
 .btn-wrap {
     display: flex;
     justify-content: center;
@@ -239,7 +243,6 @@ nav a.active {
     background: #f3f1ee;
 }
 
-/* footer */
 footer {
     background: #2f2f2f;
     color: #ddd;
@@ -248,7 +251,6 @@ footer {
     font-size: 14px;
 }
 
-/* responsive */
 @media (max-width: 900px) {
     .menu-grid {
         grid-template-columns: 1fr;
@@ -343,141 +345,11 @@ footer {
             </div>
         </div>
 
-        <div class="menu-grid">
-            <div class="menu-card">
-                <div class="menu-title">
-                    <h2>Nail</h2>
-                    <span>네일</span>
-                </div>
-                <div class="menu-list">
-                    <div class="menu-item">
-                        <div class="item-name">케어+영양</div>
-                        <div class="item-price">20,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">원톤</div>
-                        <div class="item-price">40,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div>
-                            <div class="item-name">프리미엄 핸드스파</div>
-                            <div class="item-sub">(젤 시술 시 30,000원)</div>
-                        </div>
-                        <div class="item-price">50,000</div>
-                    </div>
-                </div>
-            </div>
+        <div id="loadingMessage" class="loading-message">메뉴를 불러오는 중입니다...</div>
+        <div id="errorMessage" class="error-message" style="display: none;">메뉴를 불러오지 못했습니다.</div>
+        <div id="emptyMessage" class="empty-message" style="display: none;">등록된 메뉴가 없습니다.</div>
 
-            <div class="menu-card">
-                <div class="menu-title">
-                    <h2>Option</h2>
-                    <span>옵션</span>
-                </div>
-                <div class="menu-list">
-                    <div class="menu-item">
-                        <div class="item-name">그라데이션/자석젤</div>
-                        <div class="item-price">10,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">프렌치</div>
-                        <div class="item-price">15,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">파우더</div>
-                        <div class="item-price">20,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">연장(1pcs)</div>
-                        <div class="item-price">10,000</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="menu-card">
-                <div class="menu-title">
-                    <h2>Pedi</h2>
-                    <span>패디</span>
-                </div>
-                <div class="menu-list">
-                    <div class="menu-item">
-                        <div class="item-name">케어+영양</div>
-                        <div class="item-price">25,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">원톤</div>
-                        <div class="item-price">50,000</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="menu-card">
-                <div class="menu-title">
-                    <h2>Eyelash</h2>
-                    <span>속눈썹</span>
-                </div>
-                <div class="menu-list">
-                    <div class="menu-item">
-                        <div class="item-name">속눈썹펌</div>
-                        <div class="item-price">35,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">영양제</div>
-                        <div class="item-price">가격 변동</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="menu-card">
-                <div class="menu-title">
-                    <h2>Remove</h2>
-                    <span>제거</span>
-                </div>
-                <div class="menu-list">
-                    <div class="menu-item">
-                        <div class="item-name">자샵제거(제거+쉐입)</div>
-                        <div class="item-price">10,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">타샵제거(제거+쉐입)</div>
-                        <div class="item-price">15,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">자샵제거(젤 시술시)</div>
-                        <div class="item-price">5,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">타샵제거(젤 시술시)</div>
-                        <div class="item-price">10,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">연장/풀파츠 (1pcs)</div>
-                        <div class="item-price">1,000</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">패디</div>
-                        <div class="item-price">+ 5,000</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="menu-card">
-                <div class="menu-title">
-                    <h2>Membership</h2>
-                    <span>멤버십</span>
-                </div>
-                <div class="menu-list">
-                    <div class="menu-item">
-                        <div class="item-name">20만원</div>
-                        <div class="item-price">22만원 적립</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="item-name">30만원</div>
-                        <div class="item-price">35만원 적립!</div>
-                    </div>
-                </div>
-                <div class="membership-note">젤 시술 시 자샵 제거 S/V</div>
-            </div>
-        </div>
+        <div id="menuGrid" class="menu-grid" style="display: none;"></div>
 
         <div class="btn-wrap">
             <a href="/reservation.html" class="btn btn-main">예약하기</a>
@@ -490,6 +362,112 @@ footer {
 <footer>
     © 2026 Roen Beauty
 </footer>
+
+<script>
+const categoryInfo = {
+    NAIL: { title: "Nail", subTitle: "네일" },
+    OPTION: { title: "Option", subTitle: "옵션" },
+    PEDI: { title: "Pedi", subTitle: "패디" },
+    EYELASH: { title: "Eyelash", subTitle: "속눈썹" },
+    REMOVE: { title: "Remove", subTitle: "제거" },
+    MEMBERSHIP: { title: "Membership", subTitle: "멤버십" }
+};
+
+async function loadMenus() {
+    const loadingMessage = document.getElementById("loadingMessage");
+    const errorMessage = document.getElementById("errorMessage");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const menuGrid = document.getElementById("menuGrid");
+
+    try {
+        const response = await fetch("/api/menus");
+
+        if (!response.ok) {
+            throw new Error("메뉴 조회 실패");
+        }
+
+        const menus = await response.json();
+
+        loadingMessage.style.display = "none";
+
+        if (!menus || menus.length === 0) {
+            emptyMessage.style.display = "block";
+            return;
+        }
+
+        const groupedMenus = groupByCategory(menus);
+        renderMenus(groupedMenus);
+        menuGrid.style.display = "grid";
+    } catch (error) {
+        console.error(error);
+        loadingMessage.style.display = "none";
+        errorMessage.style.display = "block";
+    }
+}
+
+function groupByCategory(menus) {
+    return menus.reduce((acc, menu) => {
+        const category = menu.category;
+        if (!acc[category]) {
+            acc[category] = [];
+        }
+        acc[category].push(menu);
+        return acc;
+    }, {});
+}
+
+function renderMenus(groupedMenus) {
+    const menuGrid = document.getElementById("menuGrid");
+    menuGrid.innerHTML = "";
+
+    Object.keys(categoryInfo).forEach(categoryKey => {
+        const items = groupedMenus[categoryKey];
+        if (!items || items.length === 0) {
+            return;
+        }
+
+        const category = categoryInfo[categoryKey];
+        const card = document.createElement("div");
+        card.className = "menu-card";
+
+        let menuItemsHtml = items.map(item => {
+            const descriptionHtml = item.description
+                ? `<div class="item-sub">${item.description}</div>`
+                : "";
+
+            return `
+                <div class="menu-item">
+                    <div>
+                        <div class="item-name">${item.name}</div>
+                        ${descriptionHtml}
+                    </div>
+                    <div class="item-price">${item.priceText}</div>
+                </div>
+            `;
+        }).join("");
+
+        let membershipNoteHtml = "";
+        if (categoryKey === "MEMBERSHIP") {
+            membershipNoteHtml = `<div class="membership-note">젤 시술 시 자샵 제거 S/V</div>`;
+        }
+
+        card.innerHTML = `
+            <div class="menu-title">
+                <h2>${category.title}</h2>
+                <span>${category.subTitle}</span>
+            </div>
+            <div class="menu-list">
+                ${menuItemsHtml}
+            </div>
+            ${membershipNoteHtml}
+        `;
+
+        menuGrid.appendChild(card);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", loadMenus);
+</script>
 
 </body>
 </html>
