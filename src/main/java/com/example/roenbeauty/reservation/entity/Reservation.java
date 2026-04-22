@@ -1,13 +1,15 @@
 package com.example.roenbeauty.reservation.entity;
 
+import com.example.roenbeauty.global.common.BaseTimeEntity;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "reservations")
-public class Reservation {
+public class Reservation extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +34,7 @@ public class Reservation {
     private String requestMemo;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private ReservationStatus status;
 
     protected Reservation() {
@@ -86,5 +88,9 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public void updateStatus(ReservationStatus status) {
+        this.status = status;
     }
 }

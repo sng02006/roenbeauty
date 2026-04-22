@@ -2,7 +2,9 @@ package com.example.roenbeauty.reservation.dto;
 
 import com.example.roenbeauty.reservation.entity.Reservation;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class ReservationResponseDto {
@@ -15,6 +17,8 @@ public class ReservationResponseDto {
     private String serviceName;
     private String requestMemo;
     private ReservationStatus status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public ReservationResponseDto(
             Long id,
@@ -24,7 +28,9 @@ public class ReservationResponseDto {
             LocalTime reservationTime,
             String serviceName,
             String requestMemo,
-            ReservationStatus status
+            ReservationStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
     ) {
         this.id = id;
         this.name = name;
@@ -34,6 +40,8 @@ public class ReservationResponseDto {
         this.serviceName = serviceName;
         this.requestMemo = requestMemo;
         this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public static ReservationResponseDto from(Reservation reservation) {
@@ -45,7 +53,9 @@ public class ReservationResponseDto {
                 reservation.getReservationTime(),
                 reservation.getServiceName(),
                 reservation.getRequestMemo(),
-                reservation.getStatus()
+                reservation.getStatus(),
+                reservation.getCreatedAt(),
+                reservation.getUpdatedAt()
         );
     }
 
@@ -79,5 +89,13 @@ public class ReservationResponseDto {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }
