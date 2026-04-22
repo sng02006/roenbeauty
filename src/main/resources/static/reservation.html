@@ -28,11 +28,6 @@ body {
     margin: 0 auto;
 }
 
-.form-contanier {
-    max-width: 700px;
-    margin: 0 auto;
-}
-
 /* 헤더 */
 header {
     background: rgba(255, 255, 255, 0.8);
@@ -350,23 +345,47 @@ footer {
 </footer>
 
 <script>
-document.getElementById("reservationForm").addEventListener("submit", function(event) {
+document.getElementById("reservationForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
-    const name = document.getElementById("name").value;
-    const date = document.getElementById("date").value;
-    const time = document.getElementById("time").value;
-    const service = document.getElementById("service").value;
+    const reservationData = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        reservationDate: document.getElementById("date").value,
+        reservationTime: document.getElementById("time").value + ":00",
+        serviceName: document.getElementById("service").value,
+        requestMemo: document.getElementById("request").value
+    };
 
-    alert(
-        `${name}님의 예약 요청이 접수되었습니다.\n\n` +
-        `예약 날짜: ${date}\n` +
-        `예약 시간: ${time}\n` +
-        `시술 메뉴: ${service}\n\n` +
-        `확인 후 안내드리겠습니다.`
-    );
+    try {
+        const response = await fetch("/api/reservations", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(reservationData)
+        });
 
-    this.reset();
+        if (!response.ok) {
+            throw new Error("예약 요청에 실패했습니다.");
+        }
+
+        const result = await response.json();
+
+        alert(
+            `${result.name}님의 예약 요청이 접수되었습니다.\n\n` +
+            `예약 날짜: ${result.reservationDate}\n` +
+            `예약 시간: ${result.reservationTime}\n` +
+            `시술 메뉴: ${result.serviceName}\n` +
+            `상태: ${result.status}\n\n` +
+            `확인 후 순차적으로 안내드리겠습니다.`
+        );
+
+        this.reset();
+    } catch (error) {
+        console.error(error);
+        alert("예약 저장 중 오류가 발생했습니다.");
+    }
 });
 </script>
 
