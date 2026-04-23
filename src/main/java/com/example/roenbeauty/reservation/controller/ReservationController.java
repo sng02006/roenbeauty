@@ -30,7 +30,7 @@ public class ReservationController {
 
     @PatchMapping("/{id}/status")
     public ReservationResponseDto updateReservationStatus(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody ReservationUpdateStatusRequestDto requestDto
     ) {
         return reservationService.updateReservationStatus(id, requestDto);
