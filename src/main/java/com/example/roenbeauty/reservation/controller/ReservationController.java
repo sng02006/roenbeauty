@@ -3,9 +3,12 @@ package com.example.roenbeauty.reservation.controller;
 import com.example.roenbeauty.reservation.dto.ReservationCreateRequestDto;
 import com.example.roenbeauty.reservation.dto.ReservationResponseDto;
 import com.example.roenbeauty.reservation.dto.ReservationUpdateStatusRequestDto;
+import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import com.example.roenbeauty.reservation.service.ReservationService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -24,8 +27,13 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<ReservationResponseDto> getReservations() {
-        return reservationService.getReservations();
+    public List<ReservationResponseDto> getReservations(
+            @RequestParam(name = "status", required = false) ReservationStatus status,
+            @RequestParam(name = "reservationDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate reservationDate
+    ) {
+        return reservationService.getReservations(status, reservationDate);
     }
 
     @PatchMapping("/{id}/status")

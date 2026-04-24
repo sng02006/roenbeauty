@@ -9,6 +9,7 @@ import com.example.roenbeauty.reservation.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -36,9 +37,27 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponseDto> getReservations() {
-        return reservationRepository.findAll()
-                .stream()
+    public List<ReservationResponseDto> getReservations(
+            ReservationStatus status,
+            LocalDate reservationDate
+    ) {
+        List<Reservation> reservations;
+
+        if (status != null && reservationDate != null) {
+            reservations = reservationRepository
+                    .findByStatusAndReservationDateOrderByReservationTimeAsc(status, reservationDate);
+        } else if (status != null) {
+            reservations = reservationRepository
+                    .findByStatusOrderByReservationDateAscReservationTimeAsc(status);
+        } else if (reservationDate != null) {
+            reservations = reservationRepository
+                    .findByReservationDateOrderByReservationTimeAsc(reservationDate);
+        } else {
+            reservations = reservationRepository
+                    .findAllByOrderByReservationDateAscReservationTimeAsc();
+        }
+
+        return reservations.stream()
                 .map(ReservationResponseDto::from)
                 .toList();
     }
