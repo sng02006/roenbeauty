@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약 관리 | Roen Beauty</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+body {
+    font-family: "Noto Sans KR", sans-serif;
+    background: #f8f6f3;
+    color: #333;
+}
+
+.container {
+    width: min(1200px, 92%);
+    margin: 0 auto;
+}
+
+/* 헤더 */
+header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid #eee;
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 600;
+    color: #7a6f66;
+}
+
+nav ul {
+    display: flex;
+    gap: 25px;
+    list-style: none;
+}
+
+nav a {
+    font-size: 14px;
+    color: #666;
+    transition: 0.2s;
+}
+
+nav a:hover,
+nav a.active {
+    color: #a38b7b;
+    font-weight: 600;
+}
+
+/* 상단 */
+.page-hero {
+    padding: 70px 0 30px;
+    text-align: center;
+}
+
+.page-hero h1 {
+    font-size: 38px;
+    color: #2f2f2f;
+    margin-bottom: 12px;
+}
+
+.page-hero p {
+    color: #777;
+    line-height: 1.7;
+}
+
+/* 필터 */
+.filter-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 10px 0 30px;
+}
+
+.filter-btn {
+    padding: 10px 18px;
+    border-radius: 30px;
+    border: 1px solid #d6d0c9;
+    background: white;
+    color: #7a6f66;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.filter-btn.active {
+    background: #a38b7b;
+    color: white;
+    border-color: #a38b7b;
+}
+
+.filter-btn:hover {
+    background: #f3f1ee;
+}
+
+/* 상태 메시지 */
+.loading-message,
+.empty-message,
+.error-message {
+    text-align: center;
+    color: #6f665f;
+    font-size: 16px;
+    margin: 24px 0;
+}
+
+/* 카드 */
+.admin-section {
+    padding-bottom: 80px;
+}
+
+.table-card {
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+thead {
+    background: #f5f1ec;
+}
+
+th, td {
+    padding: 16px 14px;
+    text-align: left;
+    border-bottom: 1px solid #f0ebe5;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+th {
+    color: #6c635c;
+    font-weight: 700;
+}
+
+td {
+    color: #333;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-pending {
+    background: #f3ede8;
+    color: #8a725f;
+}
+
+.status-confirmed {
+    background: #e7f5ea;
+    color: #2f7a43;
+}
+
+.status-canceled {
+    background: #fdeaea;
+    color: #b04747;
+}
+
+.status-completed {
+    background: #e9eefc;
+    color: #415da8;
+}
+
+/* 버튼 */
+.action-wrap {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    border: none;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-confirm {
+    background: #dff3e5;
+    color: #2e7a44;
+}
+
+.btn-cancel {
+    background: #fde5e5;
+    color: #b04747;
+}
+
+.btn-complete {
+    background: #e6ecfb;
+    color: #415da8;
+}
+
+.action-btn:hover {
+    opacity: 0.85;
+}
+
+/* 하단 버튼 */
+.btn-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+.btn-main {
+    background: #a38b7b;
+    color: white;
+}
+
+.btn-main:hover {
+    background: #8f7868;
+}
+
+.btn-sub {
+    border: 1px solid #d6d0c9;
+    color: #7a6f66;
+    background: white;
+}
+
+.btn-sub:hover {
+    background: #f3f1ee;
+}
+
+/* 푸터 */
+footer {
+    background: #2f2f2f;
+    color: #ddd;
+    text-align: center;
+    padding: 25px;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        height: auto;
+        padding: 16px 0;
+    }
+
+    nav ul {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-hero h1 {
+        font-size: 30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="container header-inner">
+        <div class="logo"><a href="/index.html">Roen Beauty</a></div>
+        <nav>
+            <ul>
+                <li><a href="/index.html">메인</a></li>
+                <li><a href="/services.html">시술 메뉴</a></li>
+                <li><a href="/gallery.html">갤러리</a></li>
+                <li><a href="/reservation.html">예약하기</a></li>
+                <li><a href="/admin-reservations.html" class="active">예약 관리</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<div class="page-hero">
+    <div class="container">
+        <h1>예약 관리</h1>
+        <p>접수된 예약을 확인하고 상태를 변경할 수 있습니다.</p>
+    </div>
+</div>
+
+<section class="admin-section">
+    <div class="container">
+
+        <div class="filter-wrap">
+            <button class="filter-btn active" data-status="ALL">전체</button>
+            <button class="filter-btn" data-status="PENDING">대기</button>
+            <button class="filter-btn" data-status="CONFIRMED">확정</button>
+            <button class="filter-btn" data-status="CANCELED">취소</button>
+            <button class="filter-btn" data-status="COMPLETED">완료</button>
+        </div>
+
+        <div id="loadingMessage" class="loading-message">예약 목록을 불러오는 중입니다...</div>
+        <div id="errorMessage" class="error-message" style="display: none;">예약 목록을 불러오지 못했습니다.</div>
+        <div id="emptyMessage" class="empty-message" style="display: none;">등록된 예약이 없습니다.</div>
+
+        <div id="tableCard" class="table-card" style="display: none;">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>이름</th>
+                            <th>연락처</th>
+                            <th>예약 날짜</th>
+                            <th>예약 시간</th>
+                            <th>시술 메뉴</th>
+                            <th>요청사항</th>
+                            <th>상태</th>
+                            <th>생성일</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="btn-wrap">
+            <a href="/reservation.html" class="btn btn-main">예약 페이지로</a>
+            <a href="/index.html" class="btn btn-sub">메인으로 돌아가기</a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    © 2026 Roen Beauty
+</footer>
+
+<script>
+let allReservations = [];
+
+async function loadReservations() {
+    const loadingMessage = document.getElementById("loadingMessage");
+    const errorMessage = document.getElementById("errorMessage");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const tableCard = document.getElementById("tableCard");
+
+    try {
+        const response = await fetch("/api/reservations");
+
+        if (!response.ok) {
+            throw new Error("예약 조회 실패");
+        }
+
+        const reservations = await response.json();
+        allReservations = reservations;
+
+        loadingMessage.style.display = "none";
+
+        if (!reservations || reservations.length === 0) {
+            emptyMessage.style.display = "block";
+            return;
+        }
+
+        renderReservations(reservations);
+        tableCard.style.display = "block";
+    } catch (error) {
+        console.error(error);
+        loadingMessage.style.display = "none";
+        errorMessage.style.display = "block";
+    }
+}
+
+function renderReservations(reservations) {
+    const tbody = document.getElementById("reservationTableBody");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const tableCard = document.getElementById("tableCard");
+
+    tbody.innerHTML = "";
+
+    if (!reservations || reservations.length === 0) {
+        tableCard.style.display = "none";
+        emptyMessage.style.display = "block";
+        return;
+    }
+
+    emptyMessage.style.display = "none";
+    tableCard.style.display = "block";
+
+    reservations.forEach(reservation => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${reservation.id}</td>
+            <td>${reservation.name}</td>
+            <td>${reservation.phone}</td>
+            <td>${reservation.reservationDate}</td>
+            <td>${reservation.reservationTime}</td>
+            <td>${reservation.serviceName}</td>
+            <td>${reservation.requestMemo ? reservation.requestMemo : "-"}</td>
+            <td>${getStatusBadge(reservation.status)}</td>
+            <td>${formatDateTime(reservation.createdAt)}</td>
+            <td>
+                <div class="action-wrap">
+                    <button class="action-btn btn-confirm" onclick="updateReservationStatus(${reservation.id}, 'CONFIRMED')">확정</button>
+                    <button class="action-btn btn-cancel" onclick="updateReservationStatus(${reservation.id}, 'CANCELED')">취소</button>
+                    <button class="action-btn btn-complete" onclick="updateReservationStatus(${reservation.id}, 'COMPLETED')">완료</button>
+                </div>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+function getStatusBadge(status) {
+    switch (status) {
+        case "PENDING":
+            return `<span class="status-badge status-pending">대기</span>`;
+        case "CONFIRMED":
+            return `<span class="status-badge status-confirmed">확정</span>`;
+        case "CANCELED":
+            return `<span class="status-badge status-canceled">취소</span>`;
+        case "COMPLETED":
+            return `<span class="status-badge status-completed">완료</span>`;
+        default:
+            return status;
+    }
+}
+
+function formatDateTime(dateTime) {
+    if (!dateTime) {
+        return "-";
+    }
+
+    return dateTime.replace("T", " ").substring(0, 16);
+}
+
+async function updateReservationStatus(id, status) {
+    try {
+        const response = await fetch(`/api/reservations/${id}/status`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ status })
+        });
+
+        if (!response.ok) {
+            throw new Error("상태 변경 실패");
+        }
+
+        alert("예약 상태가 변경되었습니다.");
+        await loadReservationsByCurrentFilter();
+    } catch (error) {
+        console.error(error);
+        alert("상태 변경 중 오류가 발생했습니다.");
+    }
+}
+
+function filterReservations(status) {
+    if (status === "ALL") {
+        renderReservations(allReservations);
+        return;
+    }
+
+    const filtered = allReservations.filter(reservation => reservation.status === status);
+    renderReservations(filtered);
+}
+
+async function loadReservationsByCurrentFilter() {
+    await loadReservations();
+    const activeButton = document.querySelector(".filter-btn.active");
+    const currentStatus = activeButton ? activeButton.dataset.status : "ALL";
+    filterReservations(currentStatus);
+}
+
+document.querySelectorAll(".filter-btn").forEach(button => {
+    button.addEventListener("click", function() {
+        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+        this.classList.add("active");
+        filterReservations(this.dataset.status);
+    });
+});
+
+document.addEventListener("DOMContentLoaded", loadReservations);
+</script>
+
+</body>
+</html>
