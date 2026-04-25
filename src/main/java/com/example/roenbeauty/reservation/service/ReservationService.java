@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -22,6 +23,11 @@ public class ReservationService {
     }
 
     public ReservationResponseDto createReservation(ReservationCreateRequestDto requestDto) {
+        validateDuplicatedReservationTime(
+                requestDto.getReservationDate(),
+                requestDto.getReservationTime()
+        );
+
         Reservation reservation = new Reservation(
                 requestDto.getName(),
                 requestDto.getPhone(),
@@ -34,6 +40,21 @@ public class ReservationService {
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponseDto.from(savedReservation);
+    }
+
+    private void validateDuplicatedReservationTime(
+            LocalDate reservationDate,
+            LocalTime reservationTime
+    ) {
+        boolean exists = reservationRepository.existsByReservationDateAndReservationTimeAndStatusNot(
+                reservationDate,
+                reservationTime,
+                ReservationStatus.CANCELED
+        );
+
+        if (exists) {
+            throw new IllegalArgumentException("이미 예약된 시간입니다.");
+        }
     }
 
     @Transactional(readOnly = true)

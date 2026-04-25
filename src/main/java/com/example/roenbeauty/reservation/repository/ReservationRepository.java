@@ -2,10 +2,10 @@ package com.example.roenbeauty.reservation.repository;
 
 import com.example.roenbeauty.reservation.entity.Reservation;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -18,5 +18,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByStatusAndReservationDateOrderByReservationTimeAsc(
             ReservationStatus status,
             LocalDate reservationDate
+    );
+
+    boolean existsByReservationDateAndReservationTimeAndStatusNot(
+            LocalDate reservationDate,
+            LocalTime reservationTime,
+            ReservationStatus status
     );
 }

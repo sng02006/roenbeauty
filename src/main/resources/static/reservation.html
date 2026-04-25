@@ -367,7 +367,8 @@ document.getElementById("reservationForm").addEventListener("submit", async func
         });
 
         if (!response.ok) {
-            throw new Error("예약 요청에 실패했습니다.");
+            const errorText = await response.text();
+            throw new Error(errorText || "예약 요청에 실패했습니다.");
         }
 
         const result = await response.json();
@@ -384,6 +385,12 @@ document.getElementById("reservationForm").addEventListener("submit", async func
         this.reset();
     } catch (error) {
         console.error(error);
+
+        if (error.message.includes("이미 예약된 시간입니다")) {
+            alert("이미 예약된 시간입니다. 다른 시간을 선택해주세요.");
+            return;
+        }
+
         alert("예약 저장 중 오류가 발생했습니다.");
     }
 });
