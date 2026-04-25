@@ -345,6 +345,67 @@ footer {
 </footer>
 
 <script>
+const timeSelect = document.getElementById("time");
+const dateInput = document.getElementById("date");
+
+const defaultTimeOptions = [
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00"
+];
+
+dateInput.addEventListener("change", async function() {
+    const reservationDate = dateInput.value;
+
+    resetTimeOptions();
+
+    if (!reservationDate) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/reservations/reserved-times?reservationDate=${reservationDate}`);
+
+        if (!response.ok) {
+            throw new Error("예약된 시간 조회 실패");
+        }
+
+        const reservedTimes = await response.json();
+        disableReservedTimes(reservedTimes);
+    } catch (error) {
+        console.error(error);
+        alert("예약 가능 시간을 불러오지 못했습니다.");
+    }
+});
+
+function resetTimeOptions() {
+    timeSelect.innerHTML = `<option value="">시간을 선택해주세요</option>`;
+
+    defaultTimeOptions.forEach(time => {
+        const option = document.createElement("option");
+        option.value = time;
+        option.textContent = time;
+        timeSelect.appendChild(option);
+    });
+}
+
+function disableReservedTimes(reservedTimes) {
+    const normalizedReservedTimes = reservedTimes.map(time => time.substring(0, 5));
+
+    Array.from(timeSelect.options).forEach(option => {
+        if (normalizedReservedTimes.includes(option.value)) {
+            option.disabled = true;
+            option.textContent = `${option.value} 예약 완료`;
+        }
+    });
+}
+
 document.getElementById("reservationForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
@@ -383,6 +444,7 @@ document.getElementById("reservationForm").addEventListener("submit", async func
         );
 
         this.reset();
+        resetTimeOptions();
     } catch (error) {
         console.error(error);
 
@@ -394,6 +456,8 @@ document.getElementById("reservationForm").addEventListener("submit", async func
         alert("예약 저장 중 오류가 발생했습니다.");
     }
 });
+
+resetTimeOptions();
 </script>
 
 </body>

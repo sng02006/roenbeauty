@@ -43,4 +43,13 @@ public class ReservationController {
     ) {
         return reservationService.updateReservationStatus(id, requestDto);
     }
+
+    @GetMapping("/reserved-times")
+    public List<String> getReservedTimes(
+            @RequestParam(name = "reservationDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate reservationDate
+    ) {
+        return reservationService.getReservedTimes(reservationDate);
+    }
 }

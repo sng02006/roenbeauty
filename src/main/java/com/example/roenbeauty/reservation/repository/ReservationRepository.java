@@ -20,6 +20,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate reservationDate
     );
 
+    List<Reservation> findByReservationDateAndStatusNotOrderByReservationTimeAsc(
+        LocalDate reservationDate,
+        ReservationStatus status
+    );
+
     boolean existsByReservationDateAndReservationTimeAndStatusNot(
             LocalDate reservationDate,
             LocalTime reservationTime,

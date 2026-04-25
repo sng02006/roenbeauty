@@ -58,6 +58,18 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
+    public List<String> getReservedTimes(LocalDate reservationDate) {
+        return reservationRepository
+                .findByReservationDateAndStatusNotOrderByReservationTimeAsc(
+                        reservationDate,
+                        ReservationStatus.CANCELED
+                )
+                .stream()
+                .map(reservation -> reservation.getReservationTime().toString())
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<ReservationResponseDto> getReservations(
             ReservationStatus status,
             LocalDate reservationDate
