@@ -372,7 +372,7 @@ footer {
 </footer>
 
 <script>
-let allReservations = [];
+let currentStatus = "ALL";
 
 async function loadReservations() {
     const loadingMessage = document.getElementById("loadingMessage");
@@ -380,15 +380,21 @@ async function loadReservations() {
     const emptyMessage = document.getElementById("emptyMessage");
     const tableCard = document.getElementById("tableCard");
 
+    loadingMessage.style.display = "block";
+    errorMessage.style.display = "none";
+    emptyMessage.style.display = "none";
+    tableCard.style.display = "none";
+
     try {
-        const response = await fetch("/api/reservations");
+        const url = buildReservationApiUrl();
+
+        const response = await fetch(url);
 
         if (!response.ok) {
             throw new Error("예약 조회 실패");
         }
 
         const reservations = await response.json();
-        allReservations = reservations;
 
         loadingMessage.style.display = "none";
 
@@ -404,6 +410,22 @@ async function loadReservations() {
         loadingMessage.style.display = "none";
         errorMessage.style.display = "block";
     }
+}
+
+function buildReservationApiUrl() {
+    const params = new URLSearchParams();
+
+    if (currentStatus !== "ALL") {
+        params.append("status", currentStatus);
+    }
+
+    const queryString = params.toString();
+
+    if (!queryString) {
+        return "/api/reservations";
+    }
+
+    return `/api/reservations?${queryString}`;
 }
 
 function renderReservations(reservations) {
@@ -486,35 +508,20 @@ async function updateReservationStatus(id, status) {
         }
 
         alert("예약 상태가 변경되었습니다.");
-        await loadReservationsByCurrentFilter();
+        await loadReservations();
     } catch (error) {
         console.error(error);
         alert("상태 변경 중 오류가 발생했습니다.");
     }
 }
 
-function filterReservations(status) {
-    if (status === "ALL") {
-        renderReservations(allReservations);
-        return;
-    }
-
-    const filtered = allReservations.filter(reservation => reservation.status === status);
-    renderReservations(filtered);
-}
-
-async function loadReservationsByCurrentFilter() {
-    await loadReservations();
-    const activeButton = document.querySelector(".filter-btn.active");
-    const currentStatus = activeButton ? activeButton.dataset.status : "ALL";
-    filterReservations(currentStatus);
-}
-
 document.querySelectorAll(".filter-btn").forEach(button => {
-    button.addEventListener("click", function() {
+    button.addEventListener("click", async function() {
         document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
         this.classList.add("active");
-        filterReservations(this.dataset.status);
+
+        currentStatus = this.dataset.status;
+        await loadReservations();
     });
 });
 
