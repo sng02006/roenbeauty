@@ -1,5 +1,7 @@
 package com.example.roenbeauty.reservation.service;
 
+import com.example.roenbeauty.businesshour.entity.BusinessHour;
+import com.example.roenbeauty.businesshour.repository.BusinessHourRepository;
 import com.example.roenbeauty.menu.entity.Menu;
 import com.example.roenbeauty.menu.repository.MenuRepository;
 import com.example.roenbeauty.reservation.dto.ReservationCreateRequestDto;
@@ -11,6 +13,7 @@ import com.example.roenbeauty.reservation.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -21,13 +24,16 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final MenuRepository menuRepository;
+    private final BusinessHourRepository businessHourRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            MenuRepository menuRepository
+            MenuRepository menuRepository,
+            BusinessHourRepository businessHourRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.menuRepository = menuRepository;
+        this.businessHourRepository = businessHourRepository;
     }
 
     public ReservationResponseDto createReservation(ReservationCreateRequestDto requestDto) {
@@ -162,10 +168,21 @@ public class ReservationService {
                         ReservationStatus.CANCELED
                 );
 
-        List<LocalTime> timeSlots = new ArrayList<>();
+        DayOfWeek dayOfWeek = reservationDate.getDayOfWeek();
 
-        LocalTime start = LocalTime.of(10, 0);
-        LocalTime end = LocalTime.of(18, 0);
+        BusinessHour businessHour = businessHourRepository.findByDayOfWeek(dayOfWeek)
+                .orElseThrow(() -> new IllegalArgumentException("영업시간 정보가 없습니다."));
+
+        if (businessHour.getClosed()
+                || businessHour.getOpenTime() == null
+                || businessHour.getCloseTime() == null) {
+            return List.of();
+        }
+
+        LocalTime start = businessHour.getOpenTime();
+        LocalTime end = businessHour.getCloseTime().minusMinutes(menu.getDurationMinutes());
+
+        List<LocalTime> timeSlots = new ArrayList<>();
 
         while (!start.isAfter(end)) {
             timeSlots.add(start);
