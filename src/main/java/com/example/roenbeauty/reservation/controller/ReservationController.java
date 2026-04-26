@@ -52,4 +52,14 @@ public class ReservationController {
     ) {
         return reservationService.getReservedTimes(reservationDate);
     }
+
+    @GetMapping("/available-times")
+    public List<String> getAvailableTimes(
+            @RequestParam(name = "reservationDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate reservationDate,
+            @RequestParam(name = "menuId") Long menuId
+    ) {
+        return reservationService.getAvailableTimes(reservationDate, menuId);
+    }
 }

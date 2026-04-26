@@ -284,6 +284,13 @@ footer {
                         <input type="tel" id="phone" name="phone" placeholder="010-0000-0000" required>
                     </div>
 
+                    <div class="form-group full">
+                        <label for="service">시술 메뉴</label>
+                        <select id="service" name="service" required>
+                            <option value="">시술 메뉴를 선택해주세요</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="date">예약 날짜</label>
                         <input type="date" id="date" name="date" required>
@@ -291,27 +298,8 @@ footer {
 
                     <div class="form-group">
                         <label for="time">예약 시간</label>
-                        <select id="time" name="time" required>
-                            <option value="">시간을 선택해주세요</option>
-                            <option>10:00</option>
-                            <option>11:00</option>
-                            <option>12:00</option>
-                            <option>13:00</option>
-                            <option>14:00</option>
-                            <option>15:00</option>
-                            <option>16:00</option>
-                            <option>17:00</option>
-                            <option>18:00</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group full">
-                        <label for="service">시술 메뉴</label>
-                        <select id="service" name="service" required>
-                            <option value="">시술 메뉴를 선택해주세요</option>
-                            <option value="1">케어+영양</option>
-                            <option value="2">원톤</option>
-                            <option value="3">프리미엄 핸드스파</option>
+                        <select id="time" name="time" required disabled>
+                            <option value="">메뉴와 날짜를 먼저 선택해주세요</option>
                         </select>
                     </div>
 
@@ -342,65 +330,89 @@ footer {
 </footer>
 
 <script>
-const timeSelect = document.getElementById("time");
+const serviceSelect = document.getElementById("service");
 const dateInput = document.getElementById("date");
+const timeSelect = document.getElementById("time");
 
-const defaultTimeOptions = [
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00"
-];
+document.addEventListener("DOMContentLoaded", async function() {
+    await loadMenus();
+    resetTimeSelect("메뉴와 날짜를 먼저 선택해주세요");
+});
 
-dateInput.addEventListener("change", async function() {
+async function loadMenus() {
+    try {
+        const response = await fetch("/api/menus");
+
+        if (!response.ok) {
+            throw new Error("메뉴 조회 실패");
+        }
+
+        const menus = await response.json();
+
+        serviceSelect.innerHTML = `<option value="">시술 메뉴를 선택해주세요</option>`;
+
+        menus.forEach(menu => {
+            const option = document.createElement("option");
+            option.value = menu.id;
+            option.textContent = `${menu.name} (${menu.durationMinutes}분)`;
+            serviceSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error(error);
+        alert("시술 메뉴를 불러오지 못했습니다.");
+    }
+}
+
+serviceSelect.addEventListener("change", loadAvailableTimes);
+dateInput.addEventListener("change", loadAvailableTimes);
+
+async function loadAvailableTimes() {
+    const menuId = serviceSelect.value;
     const reservationDate = dateInput.value;
 
-    resetTimeOptions();
-
-    if (!reservationDate) {
+    if (!menuId || !reservationDate) {
+        resetTimeSelect("메뉴와 날짜를 먼저 선택해주세요");
         return;
     }
 
+    resetTimeSelect("예약 가능 시간을 불러오는 중입니다...");
+
     try {
-        const response = await fetch(`/api/reservations/reserved-times?reservationDate=${reservationDate}`);
+        const response = await fetch(
+            `/api/reservations/available-times?reservationDate=${reservationDate}&menuId=${menuId}`
+        );
 
         if (!response.ok) {
-            throw new Error("예약된 시간 조회 실패");
+            throw new Error("예약 가능 시간 조회 실패");
         }
 
-        const reservedTimes = await response.json();
-        disableReservedTimes(reservedTimes);
+        const availableTimes = await response.json();
+
+        timeSelect.innerHTML = "";
+
+        if (!availableTimes || availableTimes.length === 0) {
+            resetTimeSelect("예약 가능한 시간이 없습니다");
+            return;
+        }
+
+        timeSelect.disabled = false;
+        timeSelect.innerHTML = `<option value="">시간을 선택해주세요</option>`;
+
+        availableTimes.forEach(time => {
+            const option = document.createElement("option");
+            option.value = time;
+            option.textContent = time;
+            timeSelect.appendChild(option);
+        });
     } catch (error) {
         console.error(error);
-        alert("예약 가능 시간을 불러오지 못했습니다.");
+        resetTimeSelect("예약 가능 시간을 불러오지 못했습니다");
     }
-});
-
-function resetTimeOptions() {
-    timeSelect.innerHTML = `<option value="">시간을 선택해주세요</option>`;
-
-    defaultTimeOptions.forEach(time => {
-        const option = document.createElement("option");
-        option.value = time;
-        option.textContent = time;
-        timeSelect.appendChild(option);
-    });
 }
 
-function disableReservedTimes(reservedTimes) {
-    const normalizedReservedTimes = reservedTimes.map(time => time.substring(0, 5));
-
-    Array.from(timeSelect.options).forEach(option => {
-        if (normalizedReservedTimes.includes(option.value)) {
-            option.disabled = true;
-            option.textContent = `${option.value} 예약 완료`;
-        }
-    });
+function resetTimeSelect(message) {
+    timeSelect.disabled = true;
+    timeSelect.innerHTML = `<option value="">${message}</option>`;
 }
 
 document.getElementById("reservationForm").addEventListener("submit", async function(event) {
@@ -436,25 +448,24 @@ document.getElementById("reservationForm").addEventListener("submit", async func
             `예약 날짜: ${result.reservationDate}\n` +
             `예약 시간: ${result.reservationTime}\n` +
             `시술 메뉴: ${result.serviceName}\n` +
+            `소요 시간: ${result.durationMinutes}분\n` +
             `상태: ${result.status}\n\n` +
             `확인 후 순차적으로 안내드리겠습니다.`
         );
 
         this.reset();
-        resetTimeOptions();
+        resetTimeSelect("메뉴와 날짜를 먼저 선택해주세요");
     } catch (error) {
         console.error(error);
 
-        if (error.message.includes("이미 예약된 시간입니다")) {
-            alert("이미 예약된 시간입니다. 다른 시간을 선택해주세요.");
+        if (error.message.includes("겹칩니다") || error.message.includes("이미 예약")) {
+            alert(error.message);
             return;
         }
 
         alert("예약 저장 중 오류가 발생했습니다.");
     }
 });
-
-resetTimeOptions();
 </script>
 
 </body>

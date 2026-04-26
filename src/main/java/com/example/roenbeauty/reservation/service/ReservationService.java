@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -148,5 +149,51 @@ public class ReservationService {
                 throw new IllegalArgumentException("확정 상태에서는 완료 또는 취소만 가능합니다.");
             }
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getAvailableTimes(LocalDate reservationDate, Long menuId) {
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+
+        List<Reservation> reservations = reservationRepository
+                .findByReservationDateAndStatusNot(
+                        reservationDate,
+                        ReservationStatus.CANCELED
+                );
+
+        List<LocalTime> timeSlots = new ArrayList<>();
+
+        LocalTime start = LocalTime.of(10, 0);
+        LocalTime end = LocalTime.of(18, 0);
+
+        while (!start.isAfter(end)) {
+            timeSlots.add(start);
+            start = start.plusMinutes(30);
+        }
+
+        return timeSlots.stream()
+                .filter(time -> !isOverlapped(time, menu.getDurationMinutes(), reservations))
+                .map(time -> time.toString().substring(0, 5))
+                .toList();
+    }
+
+    private boolean isOverlapped(
+            LocalTime newStartTime,
+            Integer newDurationMinutes,
+            List<Reservation> reservations
+    ) {
+        LocalTime newEndTime = newStartTime.plusMinutes(newDurationMinutes);
+
+        for (Reservation reservation : reservations) {
+            LocalTime existingStartTime = reservation.getReservationTime();
+            LocalTime existingEndTime = existingStartTime.plusMinutes(reservation.getDurationMinutes());
+
+            if (newStartTime.isBefore(existingEndTime) && newEndTime.isAfter(existingStartTime)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
