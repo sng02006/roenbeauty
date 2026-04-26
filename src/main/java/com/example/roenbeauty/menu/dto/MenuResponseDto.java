@@ -13,6 +13,7 @@ public class MenuResponseDto {
     private MenuCategory category;
     private Boolean visible;
     private Integer sortOrder;
+    private Integer durationMinutes;
 
     public MenuResponseDto(
             Long id,
@@ -22,7 +23,8 @@ public class MenuResponseDto {
             Integer priceValue,
             MenuCategory category,
             Boolean visible,
-            Integer sortOrder
+            Integer sortOrder,
+            Integer durationMinutes
     ) {
         this.id = id;
         this.name = name;
@@ -32,6 +34,7 @@ public class MenuResponseDto {
         this.category = category;
         this.visible = visible;
         this.sortOrder = sortOrder;
+        this.durationMinutes = durationMinutes;
     }
 
     public static MenuResponseDto from(Menu menu) {
@@ -43,7 +46,8 @@ public class MenuResponseDto {
                 menu.getPriceValue(),
                 menu.getCategory(),
                 menu.getVisible(),
-                menu.getSortOrder()
+                menu.getSortOrder(),
+                menu.getDurationMinutes()
         );
     }
 
@@ -77,5 +81,13 @@ public class MenuResponseDto {
 
     public Integer getSortOrder() {
         return sortOrder;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
     }
 }

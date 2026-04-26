@@ -37,6 +37,9 @@ public class Reservation extends BaseTimeEntity {
     @Column(nullable = false, length = 30)
     private ReservationStatus status;
 
+    @Column(nullable = false)
+    private Integer durationMinutes;
+
     protected Reservation() {
     }
 
@@ -47,7 +50,9 @@ public class Reservation extends BaseTimeEntity {
             LocalTime reservationTime,
             String serviceName,
             String requestMemo,
-            ReservationStatus status
+            ReservationStatus status,
+            Integer durationMinutes
+
     ) {
         this.name = name;
         this.phone = phone;
@@ -56,6 +61,7 @@ public class Reservation extends BaseTimeEntity {
         this.serviceName = serviceName;
         this.requestMemo = requestMemo;
         this.status = status;
+        this.durationMinutes = durationMinutes;
     }
 
     public Long getId() {
@@ -92,5 +98,9 @@ public class Reservation extends BaseTimeEntity {
 
     public void updateStatus(ReservationStatus status) {
         this.status = status;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
     }
 }

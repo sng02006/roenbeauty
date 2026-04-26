@@ -1,5 +1,7 @@
 package com.example.roenbeauty.reservation.service;
 
+import com.example.roenbeauty.menu.entity.Menu;
+import com.example.roenbeauty.menu.repository.MenuRepository;
 import com.example.roenbeauty.reservation.dto.ReservationCreateRequestDto;
 import com.example.roenbeauty.reservation.dto.ReservationResponseDto;
 import com.example.roenbeauty.reservation.dto.ReservationUpdateStatusRequestDto;
@@ -17,15 +19,24 @@ import java.util.List;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final MenuRepository menuRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            MenuRepository menuRepository
+    ) {
         this.reservationRepository = reservationRepository;
+        this.menuRepository = menuRepository;
     }
 
     public ReservationResponseDto createReservation(ReservationCreateRequestDto requestDto) {
-        validateDuplicatedReservationTime(
+        Menu menu = menuRepository.findById(requestDto.getMenuId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+
+        validateReservationTime(
                 requestDto.getReservationDate(),
-                requestDto.getReservationTime()
+                requestDto.getReservationTime(),
+                menu.getDurationMinutes()
         );
 
         Reservation reservation = new Reservation(
@@ -33,27 +44,40 @@ public class ReservationService {
                 requestDto.getPhone(),
                 requestDto.getReservationDate(),
                 requestDto.getReservationTime(),
-                requestDto.getServiceName(),
+                menu.getName(),
                 requestDto.getRequestMemo(),
-                ReservationStatus.PENDING
+                ReservationStatus.PENDING,
+                menu.getDurationMinutes()
         );
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponseDto.from(savedReservation);
     }
 
-    private void validateDuplicatedReservationTime(
+    private void validateReservationTime(
             LocalDate reservationDate,
-            LocalTime reservationTime
+            LocalTime newStartTime,
+            Integer newDurationMinutes
     ) {
-        boolean exists = reservationRepository.existsByReservationDateAndReservationTimeAndStatusNot(
-                reservationDate,
-                reservationTime,
-                ReservationStatus.CANCELED
-        );
+        LocalTime newEndTime = newStartTime.plusMinutes(newDurationMinutes);
 
-        if (exists) {
-            throw new IllegalArgumentException("이미 예약된 시간입니다.");
+        List<Reservation> reservations = reservationRepository
+                .findByReservationDateAndStatusNot(
+                        reservationDate,
+                        ReservationStatus.CANCELED
+                );
+
+        for (Reservation reservation : reservations) {
+            LocalTime existingStartTime = reservation.getReservationTime();
+            LocalTime existingEndTime = existingStartTime.plusMinutes(reservation.getDurationMinutes());
+
+            boolean isOverlapped =
+                    newStartTime.isBefore(existingEndTime)
+                            && newEndTime.isAfter(existingStartTime);
+
+            if (isOverlapped) {
+                throw new IllegalArgumentException("이미 예약된 시간과 겹칩니다. 다른 시간을 선택해주세요.");
+            }
         }
     }
 

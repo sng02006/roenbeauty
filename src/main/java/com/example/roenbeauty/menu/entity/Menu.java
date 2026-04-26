@@ -34,6 +34,9 @@ public class Menu extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer sortOrder;
 
+    @Column(nullable = false)
+    private Integer durationMinutes;
+
     protected Menu() {
     }
 
@@ -44,7 +47,8 @@ public class Menu extends BaseTimeEntity {
             Integer priceValue,
             MenuCategory category,
             Boolean visible,
-            Integer sortOrder
+            Integer sortOrder,
+            Integer durationMinutes
     ) {
         this.name = name;
         this.description = description;
@@ -53,6 +57,7 @@ public class Menu extends BaseTimeEntity {
         this.category = category;
         this.visible = visible;
         this.sortOrder = sortOrder;
+        this.durationMinutes = durationMinutes;
     }
 
     public Long getId() {
@@ -87,6 +92,10 @@ public class Menu extends BaseTimeEntity {
         return sortOrder;
     }
 
+    public Integer getDurationMinutes() {
+    return durationMinutes;
+}
+
     public void update(
             String name,
             String description,
@@ -94,7 +103,8 @@ public class Menu extends BaseTimeEntity {
             Integer priceValue,
             MenuCategory category,
             Boolean visible,
-            Integer sortOrder
+            Integer sortOrder,
+            Integer durationMinutes
     ) {
         this.name = name;
         this.description = description;
@@ -103,5 +113,6 @@ public class Menu extends BaseTimeEntity {
         this.category = category;
         this.visible = visible;
         this.sortOrder = sortOrder;
+        this.durationMinutes = durationMinutes;
     }
 }

@@ -26,7 +26,8 @@ public class MenuService {
                 requestDto.getPriceValue(),
                 requestDto.getCategory(),
                 requestDto.getVisible(),
-                requestDto.getSortOrder()
+                requestDto.getSortOrder(),
+                requestDto.getDurationMinutes()
         );
 
         Menu savedMenu = menuRepository.save(menu);
@@ -58,7 +59,8 @@ public class MenuService {
                 requestDto.getPriceValue(),
                 requestDto.getCategory(),
                 requestDto.getVisible(),
-                requestDto.getSortOrder()
+                requestDto.getSortOrder(),
+                requestDto.getDurationMinutes()
         );
 
         return MenuResponseDto.from(menu);

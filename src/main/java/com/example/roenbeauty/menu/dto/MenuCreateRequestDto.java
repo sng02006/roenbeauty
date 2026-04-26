@@ -11,6 +11,7 @@ public class MenuCreateRequestDto {
     private MenuCategory category;
     private Boolean visible;
     private Integer sortOrder;
+    private Integer durationMinutes;
 
     public MenuCreateRequestDto() {
     }
@@ -69,5 +70,13 @@ public class MenuCreateRequestDto {
 
     public void setSortOrder(Integer sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
     }
 }

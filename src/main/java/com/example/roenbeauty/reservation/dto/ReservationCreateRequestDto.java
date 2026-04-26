@@ -11,6 +11,7 @@ public class ReservationCreateRequestDto {
     private LocalTime reservationTime;
     private String serviceName;
     private String requestMemo;
+    private Long menuId;
 
     public ReservationCreateRequestDto() {
     }
@@ -61,5 +62,13 @@ public class ReservationCreateRequestDto {
 
     public void setRequestMemo(String requestMemo) {
         this.requestMemo = requestMemo;
+    }
+
+    public Long getMenuId() {
+        return menuId;
+    }
+
+    public void setMenuId(Long menuId) {
+        this.menuId = menuId;
     }
 }

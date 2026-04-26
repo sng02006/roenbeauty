@@ -19,6 +19,7 @@ public class ReservationResponseDto {
     private ReservationStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer durationMinutes;
 
     public ReservationResponseDto(
             Long id,
@@ -30,7 +31,8 @@ public class ReservationResponseDto {
             String requestMemo,
             ReservationStatus status,
             LocalDateTime createdAt,
-            LocalDateTime updatedAt
+            LocalDateTime updatedAt,
+            Integer durationMinutes
     ) {
         this.id = id;
         this.name = name;
@@ -42,6 +44,7 @@ public class ReservationResponseDto {
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.durationMinutes = durationMinutes;
     }
 
     public static ReservationResponseDto from(Reservation reservation) {
@@ -55,7 +58,8 @@ public class ReservationResponseDto {
                 reservation.getRequestMemo(),
                 reservation.getStatus(),
                 reservation.getCreatedAt(),
-                reservation.getUpdatedAt()
+                reservation.getUpdatedAt(),
+                reservation.getDurationMinutes()
         );
     }
 
@@ -97,5 +101,9 @@ public class ReservationResponseDto {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
     }
 }

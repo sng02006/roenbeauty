@@ -30,4 +30,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalTime reservationTime,
             ReservationStatus status
     );
+
+    List<Reservation> findByReservationDateAndStatusNot(
+            LocalDate reservationDate,
+            ReservationStatus status
+    );
 }
