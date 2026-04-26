@@ -168,10 +168,15 @@ td {
 }
 
 .status-badge {
-    display: inline-block;
-    padding: 6px 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 8px 16px;
+    height: 40px;
+
     border-radius: 30px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
 }
 
@@ -197,38 +202,56 @@ td {
 
 /* 버튼 */
 .action-wrap {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 72px);
     gap: 8px;
-    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 8px 16px;
+    height: 40px;
+
+    border-radius: 30px;
     border: none;
-    border-radius: 20px;
-    padding: 8px 12px;
-    font-size: 12px;
-    font-weight: 600;
+
+    font-size: 14px;
+    font-weight: 700;
+
     cursor: pointer;
-    transition: 0.2s;
 }
 
 .btn-confirm {
-    background: #dff3e5;
-    color: #2e7a44;
+    background: #e7f5ea;
+    color: #2f7a43;
 }
 
 .btn-cancel {
-    background: #fde5e5;
+    background: #fdeaea;
     color: #b04747;
 }
 
 .btn-complete {
-    background: #e6ecfb;
+    background: #e9eefc;
     color: #415da8;
 }
 
 .action-btn:hover {
-    opacity: 0.85;
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+.empty-action {
+    color: #aaa;
+    font-weight: 600;
+}
+
+.hidden-btn {
+    visibility: hidden;
 }
 
 /* 하단 버튼 */
@@ -430,19 +453,7 @@ function buildReservationApiUrl() {
 
 function renderReservations(reservations) {
     const tbody = document.getElementById("reservationTableBody");
-    const emptyMessage = document.getElementById("emptyMessage");
-    const tableCard = document.getElementById("tableCard");
-
     tbody.innerHTML = "";
-
-    if (!reservations || reservations.length === 0) {
-        tableCard.style.display = "none";
-        emptyMessage.style.display = "block";
-        return;
-    }
-
-    emptyMessage.style.display = "none";
-    tableCard.style.display = "block";
 
     reservations.forEach(reservation => {
         const tr = document.createElement("tr");
@@ -454,20 +465,48 @@ function renderReservations(reservations) {
             <td>${reservation.reservationDate}</td>
             <td>${reservation.reservationTime}</td>
             <td>${reservation.serviceName}</td>
-            <td>${reservation.requestMemo ? reservation.requestMemo : "-"}</td>
+            <td>${reservation.requestMemo || "-"}</td>
             <td>${getStatusBadge(reservation.status)}</td>
             <td>${formatDateTime(reservation.createdAt)}</td>
-            <td>
-                <div class="action-wrap">
-                    <button class="action-btn btn-confirm" onclick="updateReservationStatus(${reservation.id}, 'CONFIRMED')">확정</button>
-                    <button class="action-btn btn-cancel" onclick="updateReservationStatus(${reservation.id}, 'CANCELED')">취소</button>
-                    <button class="action-btn btn-complete" onclick="updateReservationStatus(${reservation.id}, 'COMPLETED')">완료</button>
-                </div>
-            </td>
+            <td>${renderActionButtons(reservation)}</td>
         `;
 
         tbody.appendChild(tr);
     });
+}
+
+function renderActionButtons(reservation) {
+
+    let confirmBtn = '';
+    let completeBtn = '';
+    let cancelBtn = '';
+
+    if (reservation.status === "PENDING") {
+        confirmBtn = `<button class="action-btn btn-confirm" onclick="updateReservationStatus(${reservation.id}, 'CONFIRMED')">확정</button>`;
+        completeBtn = `<button class="action-btn hidden-btn">완료</button>`;
+        cancelBtn = `<button class="action-btn btn-cancel" onclick="updateReservationStatus(${reservation.id}, 'CANCELED')">취소</button>`;
+    }
+
+    else if (reservation.status === "CONFIRMED") {
+        confirmBtn = `<button class="action-btn hidden-btn">확정</button>`;
+        completeBtn = `<button class="action-btn btn-complete" onclick="updateReservationStatus(${reservation.id}, 'COMPLETED')">완료</button>`;
+        cancelBtn = `<button class="action-btn btn-cancel" onclick="updateReservationStatus(${reservation.id}, 'CANCELED')">취소</button>`;
+    }
+
+    else {
+        // COMPLETED / CANCELED
+        confirmBtn = `<button class="action-btn hidden-btn">확정</button>`;
+        completeBtn = `<button class="action-btn hidden-btn">완료</button>`;
+        cancelBtn = `<button class="action-btn hidden-btn">취소</button>`;
+    }
+
+    return `
+        <div class="action-wrap">
+            ${confirmBtn}
+            ${completeBtn}
+            ${cancelBtn}
+        </div>
+    `;
 }
 
 function getStatusBadge(status) {

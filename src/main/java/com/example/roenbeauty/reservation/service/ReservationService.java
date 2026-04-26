@@ -96,15 +96,33 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponseDto updateReservationStatus(
-            Long id,
-            ReservationUpdateStatusRequestDto requestDto
-    ) {
+    public ReservationResponseDto updateReservationStatus(Long id, ReservationUpdateStatusRequestDto requestDto) {
+
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약이 존재하지 않습니다."));
+
+        validateStatusChange(reservation.getStatus(), requestDto.getStatus());
 
         reservation.updateStatus(requestDto.getStatus());
 
         return ReservationResponseDto.from(reservation);
+    }
+
+    private void validateStatusChange(ReservationStatus current, ReservationStatus target) {
+        if (current == ReservationStatus.CANCELED || current == ReservationStatus.COMPLETED) {
+            throw new IllegalArgumentException("이미 종료된 예약은 상태 변경이 불가능합니다.");
+        }
+
+        if (current == ReservationStatus.PENDING) {
+            if (target != ReservationStatus.CONFIRMED && target != ReservationStatus.CANCELED) {
+                throw new IllegalArgumentException("대기 상태에서는 확정 또는 취소만 가능합니다.");
+            }
+        }
+
+        if (current == ReservationStatus.CONFIRMED) {
+            if (target != ReservationStatus.COMPLETED && target != ReservationStatus.CANCELED) {
+                throw new IllegalArgumentException("확정 상태에서는 완료 또는 취소만 가능합니다.");
+            }
+        }
     }
 }
