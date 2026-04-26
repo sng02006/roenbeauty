@@ -1,5 +1,7 @@
 package com.example.roenbeauty.reservation.service;
 
+import com.example.roenbeauty.blockedtime.entity.BlockedTime;
+import com.example.roenbeauty.blockedtime.repository.BlockedTimeRepository;
 import com.example.roenbeauty.businesshour.entity.BusinessHour;
 import com.example.roenbeauty.businesshour.repository.BusinessHourRepository;
 import com.example.roenbeauty.menu.entity.Menu;
@@ -25,15 +27,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final MenuRepository menuRepository;
     private final BusinessHourRepository businessHourRepository;
+    private final BlockedTimeRepository blockedTimeRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             MenuRepository menuRepository,
-            BusinessHourRepository businessHourRepository
+            BusinessHourRepository businessHourRepository,
+            BlockedTimeRepository blockedTimeRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.menuRepository = menuRepository;
         this.businessHourRepository = businessHourRepository;
+        this.blockedTimeRepository = blockedTimeRepository;
     }
 
     public ReservationResponseDto createReservation(ReservationCreateRequestDto requestDto) {
@@ -168,6 +173,8 @@ public class ReservationService {
                         ReservationStatus.CANCELED
                 );
 
+        List<BlockedTime> blockedTimes = blockedTimeRepository.findByBlockedDateOrderByStartTimeAsc(reservationDate);
+
         DayOfWeek dayOfWeek = reservationDate.getDayOfWeek();
 
         BusinessHour businessHour = businessHourRepository.findByDayOfWeek(dayOfWeek)
@@ -191,8 +198,29 @@ public class ReservationService {
 
         return timeSlots.stream()
                 .filter(time -> !isOverlapped(time, menu.getDurationMinutes(), reservations))
+                .filter(time -> !isBlocked(time, menu.getDurationMinutes(), blockedTimes))
                 .map(time -> time.toString().substring(0, 5))
                 .toList();
+    }
+
+    private boolean isBlocked(
+            LocalTime newStartTime,
+            Integer newDurationMinutes,
+            List<BlockedTime> blockedTimes
+    ) {
+        LocalTime newEndTime = newStartTime.plusMinutes(newDurationMinutes);
+
+        for (BlockedTime blockedTime : blockedTimes) {
+            boolean isOverlapped =
+                    newStartTime.isBefore(blockedTime.getEndTime())
+                            && newEndTime.isAfter(blockedTime.getStartTime());
+
+            if (isOverlapped) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean isOverlapped(
