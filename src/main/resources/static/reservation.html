@@ -240,6 +240,20 @@ footer {
         padding: 24px;
     }
 }
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #6c635c;
+}
+
+.checkbox-label input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
 </style>
 </head>
 
@@ -303,6 +317,13 @@ footer {
                         </select>
                     </div>
 
+                    <div class="form-group full" id="extraChargeBox" style="display:none;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="extraChargeAgree">
+                            <span>20시 이후 예약은 추가금 1만원이 발생합니다. 이에 동의합니다.</span>
+                        </label>
+                    </div>
+
                     <div class="form-group full">
                         <label for="request">요청사항</label>
                         <textarea id="request" name="request" placeholder="원하시는 디자인, 참고 이미지 유무, 문의사항 등을 자유롭게 남겨주세요"></textarea>
@@ -333,6 +354,8 @@ footer {
 const serviceSelect = document.getElementById("service");
 const dateInput = document.getElementById("date");
 const timeSelect = document.getElementById("time");
+const extraChargeBox = document.getElementById("extraChargeBox");
+const extraChargeAgree = document.getElementById("extraChargeAgree");
 
 document.addEventListener("DOMContentLoaded", async function() {
     const today = new Date().toISOString().split("T")[0];
@@ -368,6 +391,7 @@ async function loadMenus() {
 
 serviceSelect.addEventListener("change", loadAvailableTimes);
 dateInput.addEventListener("change", loadAvailableTimes);
+timeSelect.addEventListener("change", handleExtraCharge);
 
 async function loadAvailableTimes() {
     const menuId = serviceSelect.value;
@@ -418,8 +442,34 @@ function resetTimeSelect(message) {
     timeSelect.innerHTML = `<option value="">${message}</option>`;
 }
 
+function handleExtraCharge() {
+    const selectedTime = timeSelect.value;
+
+    if (!selectedTime) {
+        extraChargeBox.style.display = "none";
+        return;
+    }
+
+    const hour = Number(selectedTime.split(":")[0]);
+
+    if (hour >= 20) {
+        extraChargeBox.style.display = "block";
+    } else {
+        extraChargeBox.style.display = "none";
+        extraChargeAgree.checked = false;
+    }
+}
+
 document.getElementById("reservationForm").addEventListener("submit", async function(event) {
     event.preventDefault();
+
+    const selectedTime = timeSelect.value;
+    const hour = Number(selectedTime.split(":")[0]);
+
+    if (hour >= 20 && !extraChargeAgree.checked) {
+        alert("20시 이후 예약은 추가금 동의가 필요합니다.");
+        return;
+    }
 
     const reservationData = {
         name: document.getElementById("name").value,
