@@ -335,6 +335,9 @@ const dateInput = document.getElementById("date");
 const timeSelect = document.getElementById("time");
 
 document.addEventListener("DOMContentLoaded", async function() {
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.setAttribute("min", today);
+
     await loadMenus();
     resetTimeSelect("메뉴와 날짜를 먼저 선택해주세요");
 });

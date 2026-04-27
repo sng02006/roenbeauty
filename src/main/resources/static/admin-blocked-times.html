@@ -334,7 +334,9 @@ const errorMessage = document.getElementById("errorMessage");
 
 document.addEventListener("DOMContentLoaded", function () {
     const today = new Date().toISOString().slice(0, 10);
+
     blockedDateInput.value = today;
+    blockedDateInput.setAttribute("min", today);
 
     initTimeSelects();
     loadBlockedTimes();

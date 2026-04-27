@@ -45,6 +45,8 @@ public class ReservationService {
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
 
+        validateReservationDate(requestDto.getReservationDate());
+
         validateReservationTime(
                 requestDto.getReservationDate(),
                 requestDto.getReservationTime(),
@@ -90,6 +92,12 @@ public class ReservationService {
             if (isOverlapped) {
                 throw new IllegalArgumentException("이미 예약된 시간과 겹칩니다. 다른 시간을 선택해주세요.");
             }
+        }
+    }
+
+    private void validateReservationDate(LocalDate reservationDate) {
+        if (reservationDate.isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("지난 날짜는 예약할 수 없습니다.");
         }
     }
 
