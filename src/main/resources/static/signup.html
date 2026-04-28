@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>회원가입</title>
+
+<style>
+body {
+    background: #f8f6f3;
+    font-family: Arial, sans-serif;
+}
+
+.auth-container {
+    width: 400px;
+    margin: 100px auto;
+    padding: 40px;
+    background: #fffaf5;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.auth-container h2 {
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.auth-container input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.auth-container input:focus {
+    outline: none;
+    border-color: #d4b996;
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 12px;
+    background: #d4b996;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.auth-btn:hover {
+    background: #c3a57e;
+}
+
+.auth-link {
+    margin-top: 15px;
+    font-size: 13px;
+}
+
+.auth-link a {
+    color: #a68b6d;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-container">
+    <h2>회원가입</h2>
+
+    <form id="signupForm">
+        <input type="email" id="email" placeholder="이메일" required>
+        <input type="password" id="password" placeholder="비밀번호" required>
+        <input type="text" id="name" placeholder="이름" required>
+        <input 
+            type="tel"
+            id="phone"
+            placeholder="01012345678"
+            required
+            maxlength="11"
+        >
+
+        <button type="submit" class="auth-btn">회원가입</button>
+    </form>
+
+    <div class="auth-link">
+        이미 계정이 있으신가요? <a href="login.html">로그인</a>
+    </div>
+</div>
+
+<script>
+document.getElementById("signupForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    const name = document.getElementById("name");
+
+    const phoneRaw = document.getElementById("phone").value;
+    const phone = phoneRaw.replace(/\D/g, '');
+
+    if (!/^01[0-9]\d{7,8}$/.test(phone)) {
+        alert("올바른 휴대폰 번호를 입력해주세요.");
+        return;
+    }
+
+    const data = {
+        email: email.value,
+        password: password.value,
+        name: name.value,
+        phone: phone
+    };
+
+    try {
+        const res = await fetch("/api/users/signup", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            alert(errorText || "회원가입 실패");
+            return;
+        }
+
+        alert("회원가입 성공!");
+        location.href = "/login.html";
+
+    } catch (error) {
+        console.error(error);
+        alert("서버 오류 발생");
+    }
+});
+</script>
+
+</body>
+</html>

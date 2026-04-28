@@ -254,6 +254,26 @@ footer {
     height: 16px;
     cursor: pointer;
 }
+
+.auth-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-btn {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #d6d0c9;
+    background: white;
+    color: #7a6f66;
+    transition: 0.2s;
+}
+
+.auth-btn:hover {
+    background: #f3f1ee;
+}
 </style>
 </head>
 
@@ -268,8 +288,21 @@ footer {
                 <li><a href="/services.html">시술 메뉴</a></li>
                 <li><a href="/gallery.html">갤러리</a></li>
                 <li><a href="/reservation.html" class="active">예약하기</a></li>
+
+                <li id="adminMenu" style="display:none;">
+                    <a href="/admin-reservations.html">예약 관리</a>
+                </li>
+
+                <li id="adminMenu2" style="display:none;">
+                    <a href="/admin-blocked-times.html">시간 차단</a>
+                </li>
             </ul>
         </nav>
+        <div class="auth-box">
+            <a href="/login.html" id="loginBtn" class="auth-btn">로그인</a>
+            <a href="/signup.html" id="signupBtn" class="auth-btn">회원가입</a>
+            <a href="#" id="logoutBtn" class="auth-btn" style="display:none;">로그아웃</a>
+        </div>
     </div>
 </header>
 
@@ -471,13 +504,28 @@ document.getElementById("reservationForm").addEventListener("submit", async func
         return;
     }
 
+    const nameInput = document.getElementById("name");
+    const phoneInput = document.getElementById("phone");
+    const dateInput = document.getElementById("date");
+    const timeInput = document.getElementById("time");
+    const serviceInput = document.getElementById("service");
+    const requestInput = document.getElementById("request");
+
+    const phoneRaw = phoneInput.value;
+    const phone = phoneRaw.replace(/\D/g, "");
+
+    if (!/^01[0-9]\d{7,8}$/.test(phone)) {
+        alert("올바른 휴대폰 번호를 입력해주세요.");
+        return;
+    }
+
     const reservationData = {
-        name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
-        reservationDate: document.getElementById("date").value,
-        reservationTime: document.getElementById("time").value + ":00",
-        menuId: Number(document.getElementById("service").value),
-        requestMemo: document.getElementById("request").value
+        name: nameInput.value,
+        phone: phone,
+        reservationDate: dateInput.value,
+        reservationTime: timeInput.value + ":00",
+        menuId: Number(serviceInput.value),
+        requestMemo: requestInput.value
     };
 
     try {
@@ -518,6 +566,43 @@ document.getElementById("reservationForm").addEventListener("submit", async func
 
         alert("예약 저장 중 오류가 발생했습니다.");
     }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (user) {
+        // 로그인 상태
+        loginBtn.style.display = "none";
+        signupBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+
+        // 관리자 메뉴
+        if (user.role === "ADMIN" || user.role === "OWNER") {
+            const adminMenu = document.getElementById("adminMenu");
+            const adminMenu2 = document.getElementById("adminMenu2");
+
+            if (adminMenu) adminMenu.style.display = "block";
+            if (adminMenu2) adminMenu2.style.display = "block";
+        }
+    } else {
+        // 로그아웃 상태
+        loginBtn.style.display = "inline-block";
+        signupBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
+    }
+});
+
+// 로그아웃
+document.getElementById("logoutBtn").addEventListener("click", function () {
+    localStorage.removeItem("user");
+    location.href = "/index.html";
 });
 </script>
 
