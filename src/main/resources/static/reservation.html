@@ -599,6 +599,13 @@ document.getElementById("reservationForm").addEventListener("submit", async func
         alert("예약 저장 중 오류가 발생했습니다.");
     }
 });
+
+document.getElementById("logoutBtn").addEventListener("click", function (e) {
+    e.preventDefault();
+
+    localStorage.removeItem("user");
+    location.href = "/index.html";
+});
 </script>
 
 </body>
