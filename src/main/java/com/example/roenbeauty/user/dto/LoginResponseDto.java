@@ -9,12 +9,14 @@ public class LoginResponseDto {
     private String email;
     private String name;
     private UserRole role;
+    private String phone;
 
-    public LoginResponseDto(Long userId, String email, String name, UserRole role) {
+    public LoginResponseDto(Long userId, String email, String name, UserRole role, String phone) {
         this.userId = userId;
         this.email = email;
         this.name = name;
         this.role = role;
+        this.phone = phone;
     }
 
     public static LoginResponseDto from(User user) {
@@ -22,7 +24,8 @@ public class LoginResponseDto {
                 user.getId(),
                 user.getEmail(),
                 user.getName(),
-                user.getRole()
+                user.getRole(),
+                user.getPhone()
         );
     }
 
@@ -40,5 +43,8 @@ public class LoginResponseDto {
 
     public UserRole getRole() {
         return role;
+    }
+    public String getPhone() {
+        return phone;
     }
 }

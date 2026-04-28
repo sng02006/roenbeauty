@@ -391,6 +391,29 @@ const extraChargeBox = document.getElementById("extraChargeBox");
 const extraChargeAgree = document.getElementById("extraChargeAgree");
 
 document.addEventListener("DOMContentLoaded", async function() {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+        alert("로그인 후 예약할 수 있습니다.");
+        location.href = "/login.html";
+        return;
+    }
+
+    // 로그인 상태이므로 버튼은 로그아웃만 표시
+    document.getElementById("loginBtn").style.display = "none";
+    document.getElementById("signupBtn").style.display = "none";
+    document.getElementById("logoutBtn").style.display = "inline-block";
+
+    // 사용자 정보 자동 채우기
+    document.getElementById("name").value = user.name || "";
+    document.getElementById("phone").value = user.phone || "";
+
+    // 관리자 메뉴 표시
+    if (user.role === "ADMIN" || user.role === "OWNER") {
+        document.getElementById("adminMenu").style.display = "block";
+        document.getElementById("adminMenu2").style.display = "block";
+    }
+
     const today = new Date().toISOString().split("T")[0];
     dateInput.setAttribute("min", today);
 
@@ -496,6 +519,14 @@ function handleExtraCharge() {
 document.getElementById("reservationForm").addEventListener("submit", async function(event) {
     event.preventDefault();
 
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+        alert("로그인이 필요합니다.");
+        location.href = "/login.html";
+        return;
+    }
+
     const selectedTime = timeSelect.value;
     const hour = Number(selectedTime.split(":")[0]);
 
@@ -520,6 +551,7 @@ document.getElementById("reservationForm").addEventListener("submit", async func
     }
 
     const reservationData = {
+        userId: user.userId,
         name: nameInput.value,
         phone: phone,
         reservationDate: dateInput.value,
@@ -566,43 +598,6 @@ document.getElementById("reservationForm").addEventListener("submit", async func
 
         alert("예약 저장 중 오류가 발생했습니다.");
     }
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    const loginBtn = document.getElementById("loginBtn");
-    const signupBtn = document.getElementById("signupBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    if (user) {
-        // 로그인 상태
-        loginBtn.style.display = "none";
-        signupBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-
-        // 관리자 메뉴
-        if (user.role === "ADMIN" || user.role === "OWNER") {
-            const adminMenu = document.getElementById("adminMenu");
-            const adminMenu2 = document.getElementById("adminMenu2");
-
-            if (adminMenu) adminMenu.style.display = "block";
-            if (adminMenu2) adminMenu2.style.display = "block";
-        }
-    } else {
-        // 로그아웃 상태
-        loginBtn.style.display = "inline-block";
-        signupBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-    }
-});
-
-// 로그아웃
-document.getElementById("logoutBtn").addEventListener("click", function () {
-    localStorage.removeItem("user");
-    location.href = "/index.html";
 });
 </script>
 
