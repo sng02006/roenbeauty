@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>예약 차단 시간 관리 | Roen Beauty</title>
+<title>영업 시간 관리 | Roen Beauty</title>
 
 <style>
 * {
@@ -268,7 +268,7 @@ footer {
                 </li>
 
                 <li id="adminMenu2" style="display:none;">
-                    <a href="/admin-blocked-times.html" class="active">시간 차단</a>
+                    <a href="/admin-blocked-times.html" class="active">영업 시간 관리</a>
                 </li>
             </ul>
         </nav>
@@ -281,7 +281,7 @@ footer {
 
 <div class="page-hero">
     <div class="container">
-        <h1>예약 차단 시간 관리</h1>
+        <h1>영업 시간 관리</h1>
         <p>개인 일정이나 매장 사정으로 예약을 받을 수 없는 시간을 등록할 수 있습니다.</p>
     </div>
 </div>
@@ -444,7 +444,7 @@ function initTimeSelects() {
     startTimeInput.innerHTML = `<option value="">시작 시간을 선택해주세요</option>`;
     endTimeInput.innerHTML = `<option value="">종료 시간을 선택해주세요</option>`;
 
-    const times = createTimeOptions("11:00", "21:00", 30);
+    const times = createTimeOptions("00:00", "23:59", 30);
 
     times.forEach(time => {
         const startOption = document.createElement("option");
