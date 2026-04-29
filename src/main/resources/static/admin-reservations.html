@@ -354,6 +354,10 @@ footer {
                 <li><a href="/gallery.html">갤러리</a></li>
                 <li><a href="/reservation.html">예약하기</a></li>
 
+                <li id="myReservationMenu" style="display:none;">
+                    <a href="/my-reservations.html">내 예약</a>
+                </li>
+
                 <li id="adminMenu" style="display:none;">
                     <a href="/admin-reservations.html" class="active">예약 관리</a>
                 </li>
@@ -427,6 +431,47 @@ footer {
 
 <script>
 let currentStatus = "ALL";
+
+document.addEventListener("DOMContentLoaded", async function () {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user || (user.role !== "ADMIN" && user.role !== "OWNER")) {
+        alert("관리자만 접근할 수 있습니다.");
+        location.href = "/index.html";
+        return;
+    }
+
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const myReservationMenu = document.getElementById("myReservationMenu");
+    const adminMenu = document.getElementById("adminMenu");
+    const adminMenu2 = document.getElementById("adminMenu2");
+
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+
+    if (myReservationMenu) myReservationMenu.style.display = "block";
+    if (adminMenu) adminMenu.style.display = "block";
+    if (adminMenu2) adminMenu2.style.display = "block";
+
+    logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        localStorage.removeItem("user");
+        location.href = "/index.html";
+    });
+
+    document.querySelectorAll(".filter-btn").forEach(button => {
+        button.addEventListener("click", async function () {
+            document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+            this.classList.add("active");
+
+            currentStatus = this.dataset.status;
+            await loadReservations();
+        });
+    });
+
+    await loadReservations();
+});
 
 async function loadReservations() {
     const loadingMessage = document.getElementById("loadingMessage");
@@ -600,49 +645,6 @@ async function updateReservationStatus(id, status) {
         alert("상태 변경 중 오류가 발생했습니다.");
     }
 }
-
-document.querySelectorAll(".filter-btn").forEach(button => {
-    button.addEventListener("click", async function() {
-        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-
-        currentStatus = this.dataset.status;
-        await loadReservations();
-    });
-});
-
-document.addEventListener("DOMContentLoaded", loadReservations);
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    if (user) {
-        // 로그인 상태
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-
-        // 관리자 메뉴
-        if (user.role === "ADMIN" || user.role === "OWNER") {
-            document.getElementById("adminMenu").style.display = "block";
-            document.getElementById("adminMenu2").style.display = "block";
-        }
-    } else {
-        // 로그아웃 상태
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-    }
-});
-
-// 로그아웃
-document.getElementById("logoutBtn").addEventListener("click", function () {
-    localStorage.removeItem("user");
-    location.href = "/index.html";
-});
 </script>
 
 </body>

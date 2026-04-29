@@ -2,82 +2,419 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>내 예약</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 예약 | Roen Beauty</title>
 
 <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
 body {
+    font-family: "Noto Sans KR", sans-serif;
     background: #f8f6f3;
-    font-family: Arial, sans-serif;
+    color: #333;
 }
 
 .container {
-    width: 600px;
-    margin: 80px auto;
+    width: min(1100px, 90%);
+    margin: 0 auto;
 }
 
-.card {
+/* 헤더 */
+header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid #eee;
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 600;
+    color: #7a6f66;
+}
+
+nav ul {
+    display: flex;
+    gap: 25px;
+    list-style: none;
+}
+
+nav a {
+    font-size: 14px;
+    color: #666;
+    transition: 0.2s;
+}
+
+nav a:hover,
+nav a.active {
+    color: #a38b7b;
+    font-weight: 600;
+}
+
+.auth-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-btn {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #d6d0c9;
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    color: #7a6f66;
+    transition: 0.2s;
+}
+
+.auth-btn:hover {
+    background: #f3f1ee;
+}
+
+/* 페이지 상단 */
+.page-hero {
+    padding: 80px 0 40px;
+    text-align: center;
+}
+
+.page-hero h1 {
+    font-size: 40px;
+    color: #2f2f2f;
+    margin-bottom: 14px;
+    line-height: 1.3;
+}
+
+.page-hero p {
+    color: #777;
+    line-height: 1.8;
+}
+
+/* 예약 목록 */
+.reservation-section {
+    padding-bottom: 80px;
+}
+
+.empty-box {
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 20px;
+    padding: 50px;
+    text-align: center;
+    color: #777;
+}
+
+.reservation-list {
+    display: grid;
+    gap: 18px;
+}
+
+.reservation-card {
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #3f3a36;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #f5f1ec;
+    color: #7a6f66;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+}
+
+.info-item {
+    font-size: 14px;
+    color: #555;
+}
+
+.info-item strong {
+    display: inline-block;
+    min-width: 70px;
+    color: #7a6f66;
+}
+
+.memo {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 14px;
+    background: #f8f6f3;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.btn-wrap {
+    margin-top: 28px;
+    text-align: center;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-main {
+    background: #a38b7b;
+    color: white;
+}
+
+.btn-main:hover {
+    background: #8f7868;
+}
+
+/* 푸터 */
+footer {
+    background: #2f2f2f;
+    color: #ddd;
+    text-align: center;
+    padding: 25px;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        height: auto;
+        padding: 16px 0;
+    }
+
+    nav ul {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-hero h1 {
+        font-size: 32px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-    <h2>내 예약</h2>
-    <div id="reservationList"></div>
+<header>
+    <div class="container header-inner">
+        <div class="logo"><a href="/index.html">Roen Beauty</a></div>
+
+        <nav>
+            <ul>
+                <li><a href="/index.html">메인</a></li>
+                <li><a href="/services.html">시술 메뉴</a></li>
+                <li><a href="/gallery.html">갤러리</a></li>
+                <li><a href="/reservation.html">예약하기</a></li>
+
+                <li id="myReservationMenu" style="display:none;">
+                    <a href="/my-reservations.html" class="active">내 예약</a>
+                </li>
+
+                <li id="adminMenu" style="display:none;">
+                    <a href="/admin-reservations.html">예약 관리</a>
+                </li>
+
+                <li id="adminMenu2" style="display:none;">
+                    <a href="/admin-blocked-times.html">시간 차단</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="auth-box">
+            <a href="/login.html" id="loginBtn" class="auth-btn">로그인</a>
+            <a href="/signup.html" id="signupBtn" class="auth-btn">회원가입</a>
+            <a href="#" id="logoutBtn" class="auth-btn" style="display:none;">로그아웃</a>
+        </div>
+    </div>
+</header>
+
+<div class="page-hero">
+    <div class="container">
+        <h1>내 예약</h1>
+        <p>신청하신 예약 내역과 진행 상태를 확인할 수 있습니다.</p>
+    </div>
 </div>
+
+<section class="reservation-section">
+    <div class="container">
+        <div id="reservationList" class="reservation-list"></div>
+
+        <div class="btn-wrap">
+            <a href="/reservation.html" class="btn btn-main">새 예약하기</a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    © 2026 Roen Beauty
+</footer>
 
 <script>
 document.addEventListener("DOMContentLoaded", async function () {
     const user = JSON.parse(localStorage.getItem("user"));
-    const response = await fetch(`/api/reservations/my?userId=${user.userId}`);
+
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const myReservationMenu = document.getElementById("myReservationMenu");
+    const adminMenu = document.getElementById("adminMenu");
+    const adminMenu2 = document.getElementById("adminMenu2");
 
     if (!user) {
-        alert("로그인이 필요합니다.");
+        alert("로그인 후 내 예약을 확인할 수 있습니다.");
         location.href = "/login.html";
         return;
     }
 
+    loginBtn.style.display = "none";
+    signupBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+
+    if (myReservationMenu) {
+        myReservationMenu.style.display = "block";
+    }
+
+    if (user.role === "ADMIN" || user.role === "OWNER") {
+        if (adminMenu) adminMenu.style.display = "block";
+        if (adminMenu2) adminMenu2.style.display = "block";
+    }
+
+    logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        localStorage.removeItem("user");
+        location.href = "/index.html";
+    });
+
+    await loadMyReservations(user.userId);
+});
+
+async function loadMyReservations(userId) {
+    const list = document.getElementById("reservationList");
+
     try {
-        const res = await fetch(`/api/reservations/my?userId=${user.userId}`);
+        const res = await fetch(`/api/reservations/my?userId=${userId}`);
 
         if (!res.ok) {
-            throw new Error("조회 실패");
-        }
-
-        const reservations = await res.json();
-        const list = document.getElementById("reservationList");
-
-        if (reservations.length === 0) {
-            list.innerHTML = "<p>예약 내역이 없습니다.</p>";
+            const errorText = await res.text();
+            console.error(errorText);
+            alert("예약 조회 실패");
             return;
         }
 
-        reservations.forEach(r => {
-            const div = document.createElement("div");
-            div.className = "card";
+        const reservations = await res.json();
 
-            div.innerHTML = `
-                <p><strong>이름:</strong> ${r.name}</p>
-                <p><strong>날짜:</strong> ${r.reservationDate}</p>
-                <p><strong>시간:</strong> ${r.reservationTime}</p>
-                <p><strong>메뉴:</strong> ${r.serviceName}</p>
-                <p><strong>상태:</strong> ${r.status}</p>
+        if (reservations.length === 0) {
+            list.innerHTML = `
+                <div class="empty-box">
+                    아직 예약 내역이 없습니다.<br>
+                    원하시는 시술을 선택해 예약을 신청해보세요.
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = "";
+
+        reservations.forEach(r => {
+            const card = document.createElement("div");
+            card.className = "reservation-card";
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-title">${r.serviceName}</div>
+                    <div class="status-badge">${getStatusText(r.status)}</div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item"><strong>예약자</strong> ${r.name}</div>
+                    <div class="info-item"><strong>연락처</strong> ${r.phone}</div>
+                    <div class="info-item"><strong>날짜</strong> ${r.reservationDate}</div>
+                    <div class="info-item"><strong>시간</strong> ${formatTime(r.reservationTime)}</div>
+                    <div class="info-item"><strong>소요시간</strong> ${r.durationMinutes}분</div>
+                    <div class="info-item"><strong>상태</strong> ${getStatusText(r.status)}</div>
+                </div>
+
+                <div class="memo">
+                    <strong>요청사항</strong><br>
+                    ${r.requestMemo || "작성된 요청사항이 없습니다."}
+                </div>
             `;
 
-            list.appendChild(div);
+            list.appendChild(card);
         });
 
     } catch (error) {
         console.error(error);
-        alert("예약 조회 실패");
+        alert("예약 조회 중 오류가 발생했습니다.");
     }
-});
+}
+
+function getStatusText(status) {
+    switch (status) {
+        case "PENDING": return "예약 대기";
+        case "CONFIRMED": return "예약 확정";
+        case "COMPLETED": return "시술 완료";
+        case "CANCELED": return "예약 취소";
+        default: return status;
+    }
+}
+
+function formatTime(time) {
+    if (!time) return "";
+    return time.substring(0, 5);
+}
 </script>
 
 </body>

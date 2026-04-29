@@ -269,6 +269,10 @@ footer {
                 <li><a href="/gallery.html">갤러리</a></li>
                 <li><a href="/reservation.html">예약하기</a></li>
 
+                <li id="myReservationMenu" style="display:none;">
+                    <a href="/my-reservations.html">내 예약</a>
+                </li>
+
                 <li id="adminMenu" style="display:none;">
                     <a href="/admin-reservations.html">예약 관리</a>
                 </li>
@@ -344,33 +348,39 @@ document.addEventListener("DOMContentLoaded", function () {
     const loginBtn = document.getElementById("loginBtn");
     const signupBtn = document.getElementById("signupBtn");
     const logoutBtn = document.getElementById("logoutBtn");
+    const myReservationMenu = document.getElementById("myReservationMenu");
+    const adminMenu = document.getElementById("adminMenu");
+    const adminMenu2 = document.getElementById("adminMenu2");
 
     if (user) {
-        // 로그인 상태
         loginBtn.style.display = "none";
         signupBtn.style.display = "none";
         logoutBtn.style.display = "inline-block";
 
-        // 관리자 메뉴
-        if (user.role === "ADMIN" || user.role === "OWNER") {
-            const adminMenu = document.getElementById("adminMenu");
-            const adminMenu2 = document.getElementById("adminMenu2");
+        if (myReservationMenu) {
+            myReservationMenu.style.display = "block";
+        }
 
+        if (user.role === "ADMIN" || user.role === "OWNER") {
             if (adminMenu) adminMenu.style.display = "block";
             if (adminMenu2) adminMenu2.style.display = "block";
         }
     } else {
-        // 로그아웃 상태
         loginBtn.style.display = "inline-block";
         signupBtn.style.display = "inline-block";
         logoutBtn.style.display = "none";
-    }
-});
 
-// 로그아웃
-document.getElementById("logoutBtn").addEventListener("click", function () {
-    localStorage.removeItem("user");
-    location.href = "/index.html";
+        if (myReservationMenu) {
+            myReservationMenu.style.display = "none";
+        }
+    }
+
+    logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        localStorage.removeItem("user");
+        location.href = "/index.html";
+    });
 });
 </script>
 
