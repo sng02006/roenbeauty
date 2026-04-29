@@ -62,4 +62,9 @@ public class ReservationController {
     ) {
         return reservationService.getAvailableTimes(reservationDate, menuId);
     }
+
+    @GetMapping("/my")
+    public List<ReservationResponseDto> getMyReservations(@RequestParam Long userId) {
+        return reservationService.getMyReservations(userId);
+    }
 }

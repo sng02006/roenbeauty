@@ -249,4 +249,14 @@ public class ReservationService {
 
         return false;
     }
+
+    @Transactional(readOnly = true)
+    public List<ReservationResponseDto> getMyReservations(Long userId) {
+        List<Reservation> reservations =
+                reservationRepository.findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(userId);
+
+        return reservations.stream()
+                .map(ReservationResponseDto::from)
+                .toList();
+    }
 }

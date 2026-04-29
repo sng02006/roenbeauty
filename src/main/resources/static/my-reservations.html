@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>내 예약</title>
+
+<style>
+body {
+    background: #f8f6f3;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    width: 600px;
+    margin: 80px auto;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>내 예약</h2>
+    <div id="reservationList"></div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+        alert("로그인이 필요합니다.");
+        location.href = "/login.html";
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/reservations/my?userId=${user.userId}`);
+
+        if (!res.ok) {
+            throw new Error("조회 실패");
+        }
+
+        const reservations = await res.json();
+        const list = document.getElementById("reservationList");
+
+        if (reservations.length === 0) {
+            list.innerHTML = "<p>예약 내역이 없습니다.</p>";
+            return;
+        }
+
+        reservations.forEach(r => {
+            const div = document.createElement("div");
+            div.className = "card";
+
+            div.innerHTML = `
+                <p><strong>이름:</strong> ${r.name}</p>
+                <p><strong>날짜:</strong> ${r.reservationDate}</p>
+                <p><strong>시간:</strong> ${r.reservationTime}</p>
+                <p><strong>메뉴:</strong> ${r.serviceName}</p>
+                <p><strong>상태:</strong> ${r.status}</p>
+            `;
+
+            list.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error(error);
+        alert("예약 조회 실패");
+    }
+});
+</script>
+
+</body>
+</html>

@@ -35,4 +35,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate reservationDate,
             ReservationStatus status
     );
+
+    List<Reservation> findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(Long userId);
 }
