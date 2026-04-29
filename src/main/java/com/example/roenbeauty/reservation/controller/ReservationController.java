@@ -64,7 +64,7 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    public List<ReservationResponseDto> getMyReservations(@RequestParam Long userId) {
+    public List<ReservationResponseDto> getMyReservations(@RequestParam("userId") Long userId) {
         return reservationService.getMyReservations(userId);
     }
 }

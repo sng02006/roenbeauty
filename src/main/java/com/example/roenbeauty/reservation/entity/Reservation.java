@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.example.roenbeauty.user.entity.User;
+
 @Entity
 @Table(name = "reservations")
 public class Reservation extends BaseTimeEntity {
@@ -40,6 +42,10 @@ public class Reservation extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer durationMinutes;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     protected Reservation() {
     }
 
@@ -51,8 +57,8 @@ public class Reservation extends BaseTimeEntity {
             String serviceName,
             String requestMemo,
             ReservationStatus status,
-            Integer durationMinutes
-
+            Integer durationMinutes,
+            User user
     ) {
         this.name = name;
         this.phone = phone;
@@ -62,6 +68,7 @@ public class Reservation extends BaseTimeEntity {
         this.requestMemo = requestMemo;
         this.status = status;
         this.durationMinutes = durationMinutes;
+        this.user = user;
     }
 
     public Long getId() {
@@ -102,5 +109,9 @@ public class Reservation extends BaseTimeEntity {
 
     public Integer getDurationMinutes() {
         return durationMinutes;
+    }
+
+    public User getUser() {
+        return user;
     }
 }

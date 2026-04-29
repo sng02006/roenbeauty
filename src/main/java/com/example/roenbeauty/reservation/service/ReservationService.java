@@ -14,6 +14,8 @@ import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import com.example.roenbeauty.reservation.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.roenbeauty.user.entity.User;
+import com.example.roenbeauty.user.repository.UserRepository;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -28,22 +30,28 @@ public class ReservationService {
     private final MenuRepository menuRepository;
     private final BusinessHourRepository businessHourRepository;
     private final BlockedTimeRepository blockedTimeRepository;
+    private final UserRepository userRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             MenuRepository menuRepository,
             BusinessHourRepository businessHourRepository,
-            BlockedTimeRepository blockedTimeRepository
+            BlockedTimeRepository blockedTimeRepository,
+            UserRepository userRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.menuRepository = menuRepository;
         this.businessHourRepository = businessHourRepository;
         this.blockedTimeRepository = blockedTimeRepository;
+        this.userRepository = userRepository;
     }
 
     public ReservationResponseDto createReservation(ReservationCreateRequestDto requestDto) {
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+
+        User user = userRepository.findById(requestDto.getUserId())
+                .orElseThrow(() -> new RuntimeException("유저 없음"));
 
         validateReservationDate(requestDto.getReservationDate());
 
@@ -61,7 +69,8 @@ public class ReservationService {
                 menu.getName(),
                 requestDto.getRequestMemo(),
                 ReservationStatus.PENDING,
-                menu.getDurationMinutes()
+                menu.getDurationMinutes(),
+                user
         );
 
         Reservation savedReservation = reservationRepository.save(reservation);
