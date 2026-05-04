@@ -9,8 +9,7 @@ import java.time.LocalTime;
 @Table(name = "business_hours")
 public class BusinessHour {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -18,14 +17,12 @@ public class BusinessHour {
     private DayOfWeek dayOfWeek;
 
     private LocalTime openTime;
-
     private LocalTime closeTime;
 
     @Column(nullable = false)
     private Boolean closed;
 
-    protected BusinessHour() {
-    }
+    protected BusinessHour() {}
 
     public BusinessHour(DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, Boolean closed) {
         this.dayOfWeek = dayOfWeek;
@@ -34,21 +31,10 @@ public class BusinessHour {
         this.closed = closed;
     }
 
-    public DayOfWeek getDayOfWeek() {
-        return dayOfWeek;
-    }
-
-    public LocalTime getOpenTime() {
-        return openTime;
-    }
-
-    public LocalTime getCloseTime() {
-        return closeTime;
-    }
-
-    public Boolean getClosed() {
-        return closed;
-    }
+    public DayOfWeek getDayOfWeek() { return dayOfWeek; }
+    public LocalTime getOpenTime() { return openTime; }
+    public LocalTime getCloseTime() { return closeTime; }
+    public Boolean getClosed() { return closed; }
 
     public void update(LocalTime openTime, LocalTime closeTime, Boolean closed) {
         this.openTime = openTime;
