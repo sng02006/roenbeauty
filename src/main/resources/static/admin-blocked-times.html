@@ -365,6 +365,8 @@ const tbody = document.getElementById("blockedTimeTableBody");
 const emptyMessage = document.getElementById("emptyMessage");
 const errorMessage = document.getElementById("errorMessage");
 
+const allTimes = createTimeOptions("00:00", "23:59", 30);
+
 document.addEventListener("DOMContentLoaded", function () {
     const user = JSON.parse(localStorage.getItem("user"));
 
@@ -403,6 +405,11 @@ document.addEventListener("DOMContentLoaded", function () {
 form.addEventListener("submit", async function (event) {
     event.preventDefault();
 
+    if (toMinutes(endTimeInput.value) <= toMinutes(startTimeInput.value)) {
+        alert("종료 시간은 시작 시간보다 이후여야 합니다.");
+        return;
+    }
+
     const requestData = {
         blockedDate: blockedDateInput.value,
         startTime: startTimeInput.value + ":00",
@@ -429,6 +436,7 @@ form.addEventListener("submit", async function (event) {
         startTimeInput.value = "";
         endTimeInput.value = "";
         reasonInput.value = "";
+        initTimeSelects();
 
         await loadBlockedTimes();
     } catch (error) {
@@ -439,22 +447,43 @@ form.addEventListener("submit", async function (event) {
 
 blockedDateInput.addEventListener("change", loadBlockedTimes);
 
-function initTimeSelects() {
-    startTimeInput.innerHTML = `<option value="">시작 시간을 선택해주세요</option>`;
-    endTimeInput.innerHTML = `<option value="">종료 시간을 선택해주세요</option>`;
+startTimeInput.addEventListener("change", updateTimeOptions);
+endTimeInput.addEventListener("change", updateTimeOptions);
 
-    const times = createTimeOptions("00:00", "23:59", 30);
+function initTimeSelects() {
+    renderTimeOptions(startTimeInput, allTimes, "시작 시간을 선택해주세요");
+    renderTimeOptions(endTimeInput, allTimes, "종료 시간을 선택해주세요");
+}
+
+function updateTimeOptions() {
+    const selectedStartTime = startTimeInput.value;
+    const selectedEndTime = endTimeInput.value;
+
+    const startTimes = selectedEndTime
+        ? allTimes.filter(time => toMinutes(time) < toMinutes(selectedEndTime))
+        : allTimes;
+
+    const endTimes = selectedStartTime
+        ? allTimes.filter(time => toMinutes(time) > toMinutes(selectedStartTime))
+        : allTimes;
+
+    renderTimeOptions(startTimeInput, startTimes, "시작 시간을 선택해주세요", selectedStartTime);
+    renderTimeOptions(endTimeInput, endTimes, "종료 시간을 선택해주세요", selectedEndTime);
+}
+
+function renderTimeOptions(selectElement, times, placeholder, selectedValue = "") {
+    selectElement.innerHTML = `<option value="">${placeholder}</option>`;
 
     times.forEach(time => {
-        const startOption = document.createElement("option");
-        startOption.value = time;
-        startOption.textContent = time;
-        startTimeInput.appendChild(startOption);
+        const option = document.createElement("option");
+        option.value = time;
+        option.textContent = time;
 
-        const endOption = document.createElement("option");
-        endOption.value = time;
-        endOption.textContent = time;
-        endTimeInput.appendChild(endOption);
+        if (time === selectedValue) {
+            option.selected = true;
+        }
+
+        selectElement.appendChild(option);
     });
 }
 
