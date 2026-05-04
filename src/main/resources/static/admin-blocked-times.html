@@ -365,7 +365,13 @@ const tbody = document.getElementById("blockedTimeTableBody");
 const emptyMessage = document.getElementById("emptyMessage");
 const errorMessage = document.getElementById("errorMessage");
 
-const allTimes = createTimeOptions("00:00", "23:59", 30);
+const DEFAULT_OPEN_TIME = "11:00";
+const DEFAULT_CLOSE_TIME = "21:00";
+
+let businessOpenTime = DEFAULT_OPEN_TIME;
+let businessCloseTime = DEFAULT_CLOSE_TIME;
+
+let allTimes = createTimeOptions(businessOpenTime, businessCloseTime, 30);
 
 document.addEventListener("DOMContentLoaded", function () {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -398,8 +404,9 @@ document.addEventListener("DOMContentLoaded", function () {
     blockedDateInput.value = today;
     blockedDateInput.setAttribute("min", today);
 
-    initTimeSelects();
-    loadBlockedTimes();
+    loadBusinessHours().then(() => {
+        loadBlockedTimes();
+    });
 });
 
 form.addEventListener("submit", async function (event) {
@@ -409,6 +416,14 @@ form.addEventListener("submit", async function (event) {
         alert("종료 시간은 시작 시간보다 이후여야 합니다.");
         return;
     }
+
+    if (
+    toMinutes(startTimeInput.value) < toMinutes(businessOpenTime) ||
+    toMinutes(endTimeInput.value) > toMinutes(businessCloseTime)
+) {
+    alert("선택한 시간이 영업시간 범위를 벗어났습니다.");
+    return;
+}
 
     const requestData = {
         blockedDate: blockedDateInput.value,
@@ -445,7 +460,10 @@ form.addEventListener("submit", async function (event) {
     }
 });
 
-blockedDateInput.addEventListener("change", loadBlockedTimes);
+blockedDateInput.addEventListener("change", async function () {
+    await loadBusinessHours();
+    await loadBlockedTimes();
+});
 
 startTimeInput.addEventListener("change", updateTimeOptions);
 endTimeInput.addEventListener("change", updateTimeOptions);
@@ -510,6 +528,35 @@ function toTimeText(totalMinutes) {
     const hour = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
     const minute = String(totalMinutes % 60).padStart(2, "0");
     return `${hour}:${minute}`;
+}
+
+async function loadBusinessHours() {
+    const blockedDate = blockedDateInput.value;
+
+    try {
+        const response = await fetch(`/api/business-hours?date=${blockedDate}`);
+
+        if (!response.ok) {
+            throw new Error("영업시간 조회 실패");
+        }
+
+        const businessHours = await response.json();
+
+        businessOpenTime = businessHours.openTime || DEFAULT_OPEN_TIME;
+        businessCloseTime = businessHours.closeTime || DEFAULT_CLOSE_TIME;
+    } catch (error) {
+        console.error(error);
+
+        businessOpenTime = DEFAULT_OPEN_TIME;
+        businessCloseTime = DEFAULT_CLOSE_TIME;
+    }
+
+    allTimes = createTimeOptions(businessOpenTime, businessCloseTime, 30);
+
+    startTimeInput.value = "";
+    endTimeInput.value = "";
+
+    initTimeSelects();
 }
 
 async function loadBlockedTimes() {
