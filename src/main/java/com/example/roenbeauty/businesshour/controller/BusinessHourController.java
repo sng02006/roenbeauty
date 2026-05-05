@@ -38,4 +38,9 @@ public class BusinessHourController {
     public void upsertException(@RequestBody BusinessHourExceptionRequestDto request) {
         service.upsertException(request);
     }
+
+    @GetMapping("/exceptions")
+    public List<BusinessHourResponseDto> getBusinessHourExceptions() {
+        return service.getAllExceptions();
+    }
 }

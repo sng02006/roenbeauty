@@ -308,12 +308,12 @@ footer {
 
                 <div class="form-group">
                     <label for="defaultOpenTime">오픈 시간</label>
-                    <input type="time" id="defaultOpenTime">
+                    <select id="defaultOpenTime"></select>
                 </div>
 
                 <div class="form-group">
                     <label for="defaultCloseTime">마감 시간</label>
-                    <input type="time" id="defaultCloseTime">
+                    <select id="defaultCloseTime"></select>
                 </div>
 
                 <div class="form-group">
@@ -327,6 +327,8 @@ footer {
             <div class="btn-wrap">
                 <button type="button" class="btn btn-main" onclick="updateDefaultBusinessHour()">기본 영업시간 저장</button>
             </div>
+
+            <div id="defaultBusinessHourList" style="margin-top: 24px; line-height: 1.8; color: #6c635c;"></div>
         </div>
 
         <div class="card">
@@ -340,12 +342,12 @@ footer {
 
                 <div class="form-group">
                     <label for="exceptionOpenTime">오픈 시간</label>
-                    <input type="time" id="exceptionOpenTime">
+                    <select id="exceptionOpenTime"></select>
                 </div>
 
                 <div class="form-group">
                     <label for="exceptionCloseTime">마감 시간</label>
-                    <input type="time" id="exceptionCloseTime">
+                    <select id="exceptionCloseTime"></select>
                 </div>
 
                 <div class="form-group">
@@ -354,6 +356,8 @@ footer {
                         휴무
                     </label>
                 </div>
+
+                <div id="exceptionBusinessHourList" style="margin-top: 24px; line-height: 1.8; color: #6c635c;"></div>
             </div>
 
             <div class="btn-wrap">
@@ -436,6 +440,13 @@ const reasonInput = document.getElementById("reason");
 const tbody = document.getElementById("blockedTimeTableBody");
 const emptyMessage = document.getElementById("emptyMessage");
 const errorMessage = document.getElementById("errorMessage");
+const defaultBusinessHourList = document.getElementById("defaultBusinessHourList");
+const exceptionBusinessHourList = document.getElementById("exceptionBusinessHourList");
+
+const defaultOpenTimeInput = document.getElementById("defaultOpenTime");
+const defaultCloseTimeInput = document.getElementById("defaultCloseTime");
+const exceptionOpenTimeInput = document.getElementById("exceptionOpenTime");
+const exceptionCloseTimeInput = document.getElementById("exceptionCloseTime");
 
 let businessOpenTime = null;
 let businessCloseTime = null;
@@ -474,6 +485,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     loadBusinessHours();
     loadBlockedTimes();
+    initBusinessHourTimeSelects();
+    loadDefaultBusinessHours();
+    loadBusinessHourExceptions();
 });
 
 form.addEventListener("submit", async function (event) {
@@ -745,6 +759,7 @@ async function updateDefaultBusinessHour() {
 
         alert("기본 영업시간이 저장되었습니다.");
 
+        await loadDefaultBusinessHours();
         await loadBusinessHours();
     } catch (error) {
         console.error(error);
@@ -790,12 +805,89 @@ async function saveBusinessHourException() {
 
         blockedDateInput.value = exceptionDate;
 
+        await loadBusinessHourExceptions();
         await loadBusinessHours();
         await loadBlockedTimes();
     } catch (error) {
         console.error(error);
         alert("특정 날짜 영업시간 저장 중 오류가 발생했습니다.");
     }
+}
+
+function initBusinessHourTimeSelects() {
+    const times = createTimeOptions("00:00", "23:59", 30);
+
+    renderTimeOptions(defaultOpenTimeInput, times, "오픈 시간 선택");
+    renderTimeOptions(defaultCloseTimeInput, times, "마감 시간 선택");
+    renderTimeOptions(exceptionOpenTimeInput, times, "오픈 시간 선택");
+    renderTimeOptions(exceptionCloseTimeInput, times, "마감 시간 선택");
+}
+
+async function loadDefaultBusinessHours() {
+    try {
+        const response = await fetch("/api/business-hours/default");
+
+        if (!response.ok) {
+            throw new Error("기본 영업시간 조회 실패");
+        }
+
+        const businessHours = await response.json();
+
+        defaultBusinessHourList.innerHTML = businessHours.map(hour => {
+            const dayText = convertDayOfWeek(hour.dayOfWeek);
+
+            if (hour.closed) {
+                return `<div>${dayText}: 휴무</div>`;
+            }
+
+            return `<div>${dayText}: ${formatTime(hour.openTime)} ~ ${formatTime(hour.closeTime)}</div>`;
+        }).join("");
+    } catch (error) {
+        console.error(error);
+        defaultBusinessHourList.innerHTML = "기본 영업시간을 불러오지 못했습니다.";
+    }
+}
+
+async function loadBusinessHourExceptions() {
+    try {
+        const response = await fetch("/api/business-hours/exceptions");
+
+        if (!response.ok) {
+            throw new Error("특정 날짜 영업시간 조회 실패");
+        }
+
+        const exceptions = await response.json();
+
+        if (!exceptions || exceptions.length === 0) {
+            exceptionBusinessHourList.innerHTML = "등록된 특정 날짜 영업시간이 없습니다.";
+            return;
+        }
+
+        exceptionBusinessHourList.innerHTML = exceptions.map(exception => {
+            if (exception.closed) {
+                return `<div>${exception.date}: 휴무</div>`;
+            }
+
+            return `<div>${exception.date}: ${formatTime(exception.openTime)} ~ ${formatTime(exception.closeTime)}</div>`;
+        }).join("");
+    } catch (error) {
+        console.error(error);
+        exceptionBusinessHourList.innerHTML = "특정 날짜 영업시간을 불러오지 못했습니다.";
+    }
+}
+
+function convertDayOfWeek(dayOfWeek) {
+    const days = {
+        MONDAY: "월요일",
+        TUESDAY: "화요일",
+        WEDNESDAY: "수요일",
+        THURSDAY: "목요일",
+        FRIDAY: "금요일",
+        SATURDAY: "토요일",
+        SUNDAY: "일요일"
+    };
+
+    return days[dayOfWeek] || dayOfWeek;
 }
 </script>
 

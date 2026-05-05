@@ -76,4 +76,12 @@ public class BusinessHourService {
 
         exceptionRepository.save(exception);
     }
+
+    @Transactional(readOnly = true)
+    public List<BusinessHourResponseDto> getAllExceptions() {
+        return exceptionRepository.findAll()
+                .stream()
+                .map(BusinessHourResponseDto::from)
+                .toList();
+    }
 }
