@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 public class BusinessHourService {
@@ -93,9 +95,36 @@ public class BusinessHourService {
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
-        return exceptionRepository.findByDateBetweenAndClosedTrue(startDate, endDate)
-                .stream()
-                .map(exception -> exception.getDate().toString())
+        List<BusinessHourException> exceptions =
+                exceptionRepository.findByDateBetweenAndClosedTrue(startDate, endDate);
+
+        Set<LocalDate> holidayDates = exceptions.stream()
+                .map(BusinessHourException::getDate)
+                .collect(Collectors.toSet());
+
+        List<BusinessHour> defaultBusinessHours = businessHourRepository.findAll();
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            LocalDate currentDate = date;
+
+            boolean isDefaultClosed = defaultBusinessHours.stream()
+                    .anyMatch(businessHour ->
+                            businessHour.getDayOfWeek() == currentDate.getDayOfWeek()
+                                    && Boolean.TRUE.equals(businessHour.getClosed())
+                    );
+
+            boolean hasOpenException = exceptionRepository.findByDate(currentDate)
+                    .map(exception -> !Boolean.TRUE.equals(exception.getClosed()))
+                    .orElse(false);
+
+            if (isDefaultClosed && !hasOpenException) {
+                holidayDates.add(currentDate);
+            }
+        }
+
+        return holidayDates.stream()
+                .sorted()
+                .map(LocalDate::toString)
                 .toList();
     }
 }
