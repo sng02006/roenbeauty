@@ -43,4 +43,12 @@ public class BusinessHourController {
     public List<BusinessHourResponseDto> getBusinessHourExceptions() {
         return service.getAllExceptions();
     }
+
+    @GetMapping("/holidays")
+    public List<String> getHolidayDates(
+            @RequestParam("year") int year,
+            @RequestParam("month") int month
+    ) {
+        return service.getHolidayDates(year, month);
+    }
 }

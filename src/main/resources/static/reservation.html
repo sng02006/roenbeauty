@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>예약하기 | Roen Beauty</title>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 <style>
 * {
     margin: 0;
@@ -344,7 +346,7 @@ footer {
 
                     <div class="form-group">
                         <label for="date">예약 날짜</label>
-                        <input type="date" id="date" name="date" required>
+                        <input type="text" id="date" name="date" placeholder="예약 날짜 선택" readonly required>
                     </div>
 
                     <div class="form-group">
@@ -387,12 +389,17 @@ footer {
     © 2026 Roen Beauty
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+
 <script>
 const serviceSelect = document.getElementById("service");
 const dateInput = document.getElementById("date");
 const timeSelect = document.getElementById("time");
 const extraChargeBox = document.getElementById("extraChargeBox");
 const extraChargeAgree = document.getElementById("extraChargeAgree");
+
+let reservationDatePicker;
 
 document.addEventListener("DOMContentLoaded", async function() {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -436,10 +443,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("name").value = user.name || "";
     document.getElementById("phone").value = user.phone || "";
 
-    const today = new Date().toISOString().split("T")[0];
-    dateInput.setAttribute("min", today);
-
     await loadMenus();
+    await initReservationDatePicker();
+
     resetTimeSelect("메뉴와 날짜를 먼저 선택해주세요");
 });
 
@@ -467,13 +473,71 @@ async function loadMenus() {
     }
 }
 
+async function initReservationDatePicker() {
+    const today = new Date();
+
+    const holidayDates = await loadHolidayDates(
+        today.getFullYear(),
+        today.getMonth() + 1
+    );
+
+    reservationDatePicker = flatpickr("#date", {
+        locale: "ko",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: holidayDates,
+
+        onMonthChange: async function(selectedDates, dateStr, instance) {
+            const year = instance.currentYear;
+            const month = instance.currentMonth + 1;
+
+            const newHolidayDates = await loadHolidayDates(year, month);
+            instance.set("disable", newHolidayDates);
+        },
+
+        onYearChange: async function(selectedDates, dateStr, instance) {
+            const year = instance.currentYear;
+            const month = instance.currentMonth + 1;
+
+            const newHolidayDates = await loadHolidayDates(year, month);
+            instance.set("disable", newHolidayDates);
+        },
+
+        onChange: function(selectedDates, dateStr) {
+            if (!dateStr) return;
+
+            resetTimeSelect("예약 가능 시간을 불러오는 중입니다...");
+            loadAvailableTimes();
+        }
+    });
+}
+
+async function loadHolidayDates(year, month) {
+    try {
+        const response = await fetch(
+            `/api/business-hours/holidays?year=${year}&month=${month}`
+        );
+
+        if (!response.ok) {
+            throw new Error("휴무일 조회 실패");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
 serviceSelect.addEventListener("change", loadAvailableTimes);
-dateInput.addEventListener("change", loadAvailableTimes);
 timeSelect.addEventListener("change", handleExtraCharge);
 
 async function loadAvailableTimes() {
     const menuId = serviceSelect.value;
     const reservationDate = dateInput.value;
+
+    extraChargeBox.style.display = "none";
+    extraChargeAgree.checked = false;
 
     if (!menuId || !reservationDate) {
         resetTimeSelect("메뉴와 날짜를 먼저 선택해주세요");
@@ -550,6 +614,12 @@ document.getElementById("reservationForm").addEventListener("submit", async func
     }
 
     const selectedTime = timeSelect.value;
+
+    if (!selectedTime) {
+        alert("예약 시간을 선택해주세요.");
+        return;
+    }
+
     const hour = Number(selectedTime.split(":")[0]);
 
     if (hour >= 20 && !extraChargeAgree.checked) {
@@ -609,6 +679,14 @@ document.getElementById("reservationForm").addEventListener("submit", async func
         );
 
         this.reset();
+
+        if (reservationDatePicker) {
+            reservationDatePicker.clear();
+        }
+
+        extraChargeBox.style.display = "none";
+        extraChargeAgree.checked = false;
+
         resetTimeSelect("메뉴와 날짜를 먼저 선택해주세요");
     } catch (error) {
         console.error(error);

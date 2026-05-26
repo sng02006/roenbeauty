@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -82,6 +83,19 @@ public class BusinessHourService {
         return exceptionRepository.findAll()
                 .stream()
                 .map(BusinessHourResponseDto::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getHolidayDates(int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+
+        return exceptionRepository.findByDateBetweenAndClosedTrue(startDate, endDate)
+                .stream()
+                .map(exception -> exception.getDate().toString())
                 .toList();
     }
 }
