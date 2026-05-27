@@ -448,6 +448,9 @@ const defaultCloseTimeInput = document.getElementById("defaultCloseTime");
 const exceptionOpenTimeInput = document.getElementById("exceptionOpenTime");
 const exceptionCloseTimeInput = document.getElementById("exceptionCloseTime");
 
+const defaultClosedInput = document.getElementById("defaultClosed");
+const exceptionClosedInput = document.getElementById("exceptionClosed");
+
 let businessOpenTime = null;
 let businessCloseTime = null;
 let isClosed = false;
@@ -482,6 +485,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     blockedDateInput.value = today;
     blockedDateInput.setAttribute("min", today);
+    document.getElementById("exceptionDate").setAttribute("min", today);
 
     loadBusinessHours();
     loadBlockedTimes();
@@ -554,6 +558,29 @@ blockedDateInput.addEventListener("change", async function () {
 startTimeInput.addEventListener("change", updateTimeOptions);
 endTimeInput.addEventListener("change", updateTimeOptions);
 
+defaultOpenTimeInput.addEventListener("change", updateDefaultBusinessHourTimeOptions);
+defaultCloseTimeInput.addEventListener("change", updateDefaultBusinessHourTimeOptions);
+exceptionOpenTimeInput.addEventListener("change", updateExceptionBusinessHourTimeOptions);
+exceptionCloseTimeInput.addEventListener("change", updateExceptionBusinessHourTimeOptions);
+
+defaultClosedInput.addEventListener("change", function () {
+    toggleBusinessHourInputs(
+        defaultClosedInput,
+        defaultOpenTimeInput,
+        defaultCloseTimeInput,
+        updateDefaultBusinessHourTimeOptions
+    );
+});
+
+exceptionClosedInput.addEventListener("change", function () {
+    toggleBusinessHourInputs(
+        exceptionClosedInput,
+        exceptionOpenTimeInput,
+        exceptionCloseTimeInput,
+        updateExceptionBusinessHourTimeOptions
+    );
+});
+
 async function loadBusinessHours() {
     const date = blockedDateInput.value;
 
@@ -609,6 +636,78 @@ function updateTimeOptions() {
 
     renderTimeOptions(startTimeInput, startTimes, "시작 시간을 선택해주세요", selectedStartTime);
     renderTimeOptions(endTimeInput, endTimes, "종료 시간을 선택해주세요", selectedEndTime);
+}
+
+function initBusinessHourTimeSelects() {
+    updateDefaultBusinessHourTimeOptions();
+    updateExceptionBusinessHourTimeOptions();
+
+    toggleBusinessHourInputs(
+        defaultClosedInput,
+        defaultOpenTimeInput,
+        defaultCloseTimeInput,
+        updateDefaultBusinessHourTimeOptions
+    );
+
+    toggleBusinessHourInputs(
+        exceptionClosedInput,
+        exceptionOpenTimeInput,
+        exceptionCloseTimeInput,
+        updateExceptionBusinessHourTimeOptions
+    );
+}
+
+function updateDefaultBusinessHourTimeOptions() {
+    updateBusinessHourRangeOptions(
+        defaultOpenTimeInput,
+        defaultCloseTimeInput,
+        "오픈 시간 선택",
+        "마감 시간 선택"
+    );
+}
+
+function updateExceptionBusinessHourTimeOptions() {
+    updateBusinessHourRangeOptions(
+        exceptionOpenTimeInput,
+        exceptionCloseTimeInput,
+        "오픈 시간 선택",
+        "마감 시간 선택"
+    );
+}
+
+function updateBusinessHourRangeOptions(openSelect, closeSelect, openPlaceholder, closePlaceholder) {
+    const selectedOpenTime = openSelect.value;
+    const selectedCloseTime = closeSelect.value;
+
+    const allTimes = createTimeOptions("00:00", "23:30", 30);
+
+    const openTimes = selectedCloseTime
+        ? allTimes.filter(time => toMinutes(time) < toMinutes(selectedCloseTime))
+        : allTimes;
+
+    const closeTimes = selectedOpenTime
+        ? allTimes.filter(time => toMinutes(time) > toMinutes(selectedOpenTime))
+        : allTimes;
+
+    const nextOpenValue = openTimes.includes(selectedOpenTime) ? selectedOpenTime : "";
+    const nextCloseValue = closeTimes.includes(selectedCloseTime) ? selectedCloseTime : "";
+
+    renderTimeOptions(openSelect, openTimes, openPlaceholder, nextOpenValue);
+    renderTimeOptions(closeSelect, closeTimes, closePlaceholder, nextCloseValue);
+}
+
+function toggleBusinessHourInputs(closedInput, openSelect, closeSelect, updateFunction) {
+    if (closedInput.checked) {
+        openSelect.value = "";
+        closeSelect.value = "";
+        openSelect.disabled = true;
+        closeSelect.disabled = true;
+        return;
+    }
+
+    openSelect.disabled = false;
+    closeSelect.disabled = false;
+    updateFunction();
 }
 
 function renderTimeOptions(selectElement, times, placeholder, selectedValue = "") {
@@ -732,17 +831,26 @@ function formatTime(time) {
 }
 
 async function updateDefaultBusinessHour() {
-    const requestData = {
-        dayOfWeek: document.getElementById("defaultDayOfWeek").value,
-        openTime: document.getElementById("defaultClosed").checked ? null : document.getElementById("defaultOpenTime").value + ":00",
-        closeTime: document.getElementById("defaultClosed").checked ? null : document.getElementById("defaultCloseTime").value + ":00",
-        closed: document.getElementById("defaultClosed").checked
-    };
+    const closed = defaultClosedInput.checked;
+    const openTime = defaultOpenTimeInput.value;
+    const closeTime = defaultCloseTimeInput.value;
 
-    if (!requestData.closed && (!document.getElementById("defaultOpenTime").value || !document.getElementById("defaultCloseTime").value)) {
+    if (!closed && (!openTime || !closeTime)) {
         alert("휴무가 아닌 경우 오픈 시간과 마감 시간을 입력해주세요.");
         return;
     }
+
+    if (!closed && toMinutes(closeTime) <= toMinutes(openTime)) {
+        alert("마감 시간은 오픈 시간보다 이후여야 합니다.");
+        return;
+    }
+
+    const requestData = {
+        dayOfWeek: document.getElementById("defaultDayOfWeek").value,
+        openTime: closed ? null : openTime + ":00",
+        closeTime: closed ? null : closeTime + ":00",
+        closed: closed
+    };
 
     try {
         const response = await fetch("/api/business-hours/default", {
@@ -769,22 +877,29 @@ async function updateDefaultBusinessHour() {
 
 async function saveBusinessHourException() {
     const exceptionDate = document.getElementById("exceptionDate").value;
-    const closed = document.getElementById("exceptionClosed").checked;
+    const closed = exceptionClosedInput.checked;
+    const openTime = exceptionOpenTimeInput.value;
+    const closeTime = exceptionCloseTimeInput.value;
 
     if (!exceptionDate) {
         alert("날짜를 선택해주세요.");
         return;
     }
 
-    if (!closed && (!document.getElementById("exceptionOpenTime").value || !document.getElementById("exceptionCloseTime").value)) {
+    if (!closed && (!openTime || !closeTime)) {
         alert("휴무가 아닌 경우 오픈 시간과 마감 시간을 입력해주세요.");
+        return;
+    }
+
+    if (!closed && toMinutes(closeTime) <= toMinutes(openTime)) {
+        alert("마감 시간은 오픈 시간보다 이후여야 합니다.");
         return;
     }
 
     const requestData = {
         date: exceptionDate,
-        openTime: closed ? null : document.getElementById("exceptionOpenTime").value + ":00",
-        closeTime: closed ? null : document.getElementById("exceptionCloseTime").value + ":00",
+        openTime: closed ? null : openTime + ":00",
+        closeTime: closed ? null : closeTime + ":00",
         closed: closed
     };
 
@@ -812,15 +927,6 @@ async function saveBusinessHourException() {
         console.error(error);
         alert("특정 날짜 영업시간 저장 중 오류가 발생했습니다.");
     }
-}
-
-function initBusinessHourTimeSelects() {
-    const times = createTimeOptions("00:00", "23:59", 30);
-
-    renderTimeOptions(defaultOpenTimeInput, times, "오픈 시간 선택");
-    renderTimeOptions(defaultCloseTimeInput, times, "마감 시간 선택");
-    renderTimeOptions(exceptionOpenTimeInput, times, "오픈 시간 선택");
-    renderTimeOptions(exceptionCloseTimeInput, times, "마감 시간 선택");
 }
 
 async function loadDefaultBusinessHours() {
