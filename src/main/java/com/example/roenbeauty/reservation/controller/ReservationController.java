@@ -1,5 +1,6 @@
 package com.example.roenbeauty.reservation.controller;
 
+import com.example.roenbeauty.payment.dto.CheckoutResponseDto;
 import com.example.roenbeauty.reservation.dto.ReservationCreateRequestDto;
 import com.example.roenbeauty.reservation.dto.ReservationResponseDto;
 import com.example.roenbeauty.reservation.dto.ReservationUpdateStatusRequestDto;
@@ -22,7 +23,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ReservationResponseDto createReservation(@RequestBody ReservationCreateRequestDto requestDto) {
+    public CheckoutResponseDto createReservation(@RequestBody ReservationCreateRequestDto requestDto) {
         return reservationService.createReservation(requestDto);
     }
 

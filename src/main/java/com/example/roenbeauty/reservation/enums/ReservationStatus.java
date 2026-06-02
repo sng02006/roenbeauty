@@ -1,8 +1,9 @@
 package com.example.roenbeauty.reservation.enums;
 
 public enum ReservationStatus {
-    PENDING,   // 예약 요청
-    CONFIRMED, // 예약 확정
-    CANCELED,  // 예약 취소
-    COMPLETED  // 방문 완료
+    WAITING_PAYMENT, // 예약 생성, 결제 대기
+    PAID,            // 결제 완료, 관리자 확인 대기
+    CONFIRMED,       // 예약 확정
+    COMPLETED,       // 방문 완료
+    CANCELED         // 예약 취소
 }

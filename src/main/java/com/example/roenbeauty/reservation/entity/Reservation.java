@@ -1,13 +1,14 @@
 package com.example.roenbeauty.reservation.entity;
 
 import com.example.roenbeauty.global.common.BaseTimeEntity;
+import com.example.roenbeauty.reservation.enums.CanceledBy;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
+import com.example.roenbeauty.user.entity.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-
-import com.example.roenbeauty.user.entity.User;
 
 @Entity
 @Table(name = "reservations")
@@ -42,6 +43,15 @@ public class Reservation extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer durationMinutes;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private CanceledBy canceledBy;
+
+    @Column(length = 500)
+    private String cancelReason;
+
+    private LocalDateTime canceledAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -69,6 +79,33 @@ public class Reservation extends BaseTimeEntity {
         this.status = status;
         this.durationMinutes = durationMinutes;
         this.user = user;
+    }
+
+    public void waitingPayment() {
+        this.status = ReservationStatus.WAITING_PAYMENT;
+    }
+
+    public void paid() {
+        this.status = ReservationStatus.PAID;
+    }
+
+    public void confirm() {
+        this.status = ReservationStatus.CONFIRMED;
+    }
+
+    public void complete() {
+        this.status = ReservationStatus.COMPLETED;
+    }
+
+    public void cancel(CanceledBy canceledBy, String cancelReason) {
+        this.status = ReservationStatus.CANCELED;
+        this.canceledBy = canceledBy;
+        this.cancelReason = cancelReason;
+        this.canceledAt = LocalDateTime.now();
+    }
+
+    public void updateStatus(ReservationStatus status) {
+        this.status = status;
     }
 
     public Long getId() {
@@ -103,12 +140,20 @@ public class Reservation extends BaseTimeEntity {
         return status;
     }
 
-    public void updateStatus(ReservationStatus status) {
-        this.status = status;
-    }
-
     public Integer getDurationMinutes() {
         return durationMinutes;
+    }
+
+    public CanceledBy getCanceledBy() {
+        return canceledBy;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public LocalDateTime getCanceledAt() {
+        return canceledAt;
     }
 
     public User getUser() {

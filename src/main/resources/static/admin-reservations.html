@@ -28,7 +28,6 @@ body {
     margin: 0 auto;
 }
 
-/* 헤더 */
 header {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(6px);
@@ -66,7 +65,6 @@ nav a.active {
     font-weight: 600;
 }
 
-/* 상단 */
 .page-hero {
     padding: 70px 0 30px;
     text-align: center;
@@ -83,7 +81,6 @@ nav a.active {
     line-height: 1.7;
 }
 
-/* 필터 */
 .filter-wrap {
     display: flex;
     justify-content: center;
@@ -113,7 +110,6 @@ nav a.active {
     background: #f3f1ee;
 }
 
-/* 상태 메시지 */
 .loading-message,
 .empty-message,
 .error-message {
@@ -123,7 +119,6 @@ nav a.active {
     margin: 24px 0;
 }
 
-/* 카드 */
 .admin-section {
     padding-bottom: 80px;
 }
@@ -171,18 +166,22 @@ td {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     padding: 8px 16px;
     height: 40px;
-
     border-radius: 30px;
     font-size: 14px;
     font-weight: 700;
+    white-space: nowrap;
 }
 
-.status-pending {
-    background: #f3ede8;
-    color: #8a725f;
+.status-waiting-payment {
+    background: #fff4df;
+    color: #a56a00;
+}
+
+.status-paid {
+    background: #e8f3ff;
+    color: #2f65a8;
 }
 
 .status-confirmed {
@@ -200,7 +199,6 @@ td {
     color: #415da8;
 }
 
-/* 버튼 */
 .action-wrap {
     display: grid;
     grid-template-columns: repeat(3, 72px);
@@ -212,16 +210,12 @@ td {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     padding: 8px 16px;
     height: 40px;
-
     border-radius: 30px;
     border: none;
-
     font-size: 14px;
     font-weight: 700;
-
     cursor: pointer;
 }
 
@@ -245,16 +239,10 @@ td {
     opacity: 0.9;
 }
 
-.empty-action {
-    color: #aaa;
-    font-weight: 600;
-}
-
 .hidden-btn {
     visibility: hidden;
 }
 
-/* 하단 버튼 */
 .btn-wrap {
     display: flex;
     justify-content: center;
@@ -291,7 +279,6 @@ td {
     background: #f3f1ee;
 }
 
-/* 푸터 */
 footer {
     background: #2f2f2f;
     color: #ddd;
@@ -386,7 +373,8 @@ footer {
 
         <div class="filter-wrap">
             <button class="filter-btn active" data-status="ALL">전체</button>
-            <button class="filter-btn" data-status="PENDING">대기</button>
+            <button class="filter-btn" data-status="WAITING_PAYMENT">결제 대기</button>
+            <button class="filter-btn" data-status="PAID">결제 완료</button>
             <button class="filter-btn" data-status="CONFIRMED">확정</button>
             <button class="filter-btn" data-status="CANCELED">취소</button>
             <button class="filter-btn" data-status="COMPLETED">완료</button>
@@ -539,7 +527,7 @@ function renderReservations(reservations) {
             <td>${reservation.name}</td>
             <td>${formatPhone(reservation.phone)}</td>
             <td>${reservation.reservationDate}</td>
-            <td>${reservation.reservationTime}</td>
+            <td>${formatTime(reservation.reservationTime)}</td>
             <td>${reservation.serviceName}</td>
             <td>${reservation.requestMemo || "-"}</td>
             <td>${getStatusBadge(reservation.status)}</td>
@@ -552,28 +540,22 @@ function renderReservations(reservations) {
 }
 
 function renderActionButtons(reservation) {
+    let confirmBtn = `<button class="action-btn hidden-btn">확정</button>`;
+    let completeBtn = `<button class="action-btn hidden-btn">완료</button>`;
+    let cancelBtn = `<button class="action-btn hidden-btn">취소</button>`;
 
-    let confirmBtn = '';
-    let completeBtn = '';
-    let cancelBtn = '';
+    if (reservation.status === "WAITING_PAYMENT") {
+        // 결제 전 상태는 관리자가 확정/취소 처리하지 않음
+    }
 
-    if (reservation.status === "PENDING") {
+    else if (reservation.status === "PAID") {
         confirmBtn = `<button class="action-btn btn-confirm" onclick="updateReservationStatus(${reservation.id}, 'CONFIRMED')">확정</button>`;
-        completeBtn = `<button class="action-btn hidden-btn">완료</button>`;
-        cancelBtn = `<button class="action-btn btn-cancel" onclick="updateReservationStatus(${reservation.id}, 'CANCELED')">취소</button>`;
+        cancelBtn = `<button class="action-btn btn-cancel" onclick="cancelReservation(${reservation.id}, 'OWNER')">취소</button>`;
     }
 
     else if (reservation.status === "CONFIRMED") {
-        confirmBtn = `<button class="action-btn hidden-btn">확정</button>`;
         completeBtn = `<button class="action-btn btn-complete" onclick="updateReservationStatus(${reservation.id}, 'COMPLETED')">완료</button>`;
-        cancelBtn = `<button class="action-btn btn-cancel" onclick="updateReservationStatus(${reservation.id}, 'CANCELED')">취소</button>`;
-    }
-
-    else {
-        // COMPLETED / CANCELED
-        confirmBtn = `<button class="action-btn hidden-btn">확정</button>`;
-        completeBtn = `<button class="action-btn hidden-btn">완료</button>`;
-        cancelBtn = `<button class="action-btn hidden-btn">취소</button>`;
+        cancelBtn = `<button class="action-btn btn-cancel" onclick="cancelReservation(${reservation.id}, 'OWNER')">취소</button>`;
     }
 
     return `
@@ -587,8 +569,10 @@ function renderActionButtons(reservation) {
 
 function getStatusBadge(status) {
     switch (status) {
-        case "PENDING":
-            return `<span class="status-badge status-pending">대기</span>`;
+        case "WAITING_PAYMENT":
+            return `<span class="status-badge status-waiting-payment">결제 대기</span>`;
+        case "PAID":
+            return `<span class="status-badge status-paid">결제 완료</span>`;
         case "CONFIRMED":
             return `<span class="status-badge status-confirmed">확정</span>`;
         case "CANCELED":
@@ -606,6 +590,14 @@ function formatDateTime(dateTime) {
     }
 
     return dateTime.replace("T", " ").substring(0, 16);
+}
+
+function formatTime(time) {
+    if (!time) {
+        return "-";
+    }
+
+    return time.substring(0, 5);
 }
 
 function formatPhone(phone) {
@@ -643,6 +635,38 @@ async function updateReservationStatus(id, status) {
     } catch (error) {
         console.error(error);
         alert("상태 변경 중 오류가 발생했습니다.");
+    }
+}
+
+async function cancelReservation(id, canceledBy) {
+    const reason = prompt("취소 사유를 입력해주세요.");
+
+    if (reason === null) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/reservations/${id}/payments/cancel`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                cancelReason: reason,
+                canceledBy: canceledBy
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "예약 취소 실패");
+        }
+
+        alert("예약 및 결제가 취소되었습니다.");
+        await loadReservations();
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "예약 취소 중 오류가 발생했습니다.");
     }
 }
 </script>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제 완료 | Roen Beauty</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Noto Sans KR", sans-serif;
+    background: #f8f6f3;
+}
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    background: white;
+    width: 500px;
+    max-width: 90%;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin-bottom: 12px;
+    color: #2f2f2f;
+}
+
+p {
+    color: #666;
+    line-height: 1.8;
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 12px 24px;
+    border-radius: 30px;
+    background: #a38b7b;
+    color: white;
+    text-decoration: none;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <div class="icon">💳</div>
+
+        <h1>결제 확인 중입니다</h1>
+
+        <p id="message">
+            결제 승인 요청을 처리하고 있습니다.
+        </p>
+
+        <a href="/my-reservations.html" class="btn">
+            내 예약 보기
+        </a>
+    </div>
+</div>
+
+<script>
+(async function () {
+
+    const params = new URLSearchParams(window.location.search);
+
+    const paymentKey = params.get("paymentKey");
+    const orderId = params.get("orderId");
+    const amount = params.get("amount");
+    const reservationId = params.get("reservationId");
+
+    try {
+
+        const response = await fetch(
+            `/api/reservations/${reservationId}/payments/confirm`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    paymentKey,
+                    orderId,
+                    amount: Number(amount)
+                })
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error();
+        }
+
+        document.getElementById("message").innerHTML =
+            `
+            예약금 결제가 완료되었습니다.<br>
+            예약 요청이 정상적으로 접수되었습니다.<br><br>
+            관리자 확인 후 예약이 확정됩니다.
+            `;
+
+    } catch (e) {
+
+        document.getElementById("message").innerHTML =
+            `
+            결제 승인 처리 중 오류가 발생했습니다.<br>
+            매장으로 문의해주세요.
+            `;
+    }
+
+})();
+</script>
+
+</body>
+</html>

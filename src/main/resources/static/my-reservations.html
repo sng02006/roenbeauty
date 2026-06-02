@@ -28,7 +28,6 @@ body {
     margin: 0 auto;
 }
 
-/* 헤더 */
 header {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(6px);
@@ -86,7 +85,6 @@ nav a.active {
     background: #f3f1ee;
 }
 
-/* 페이지 상단 */
 .page-hero {
     padding: 80px 0 40px;
     text-align: center;
@@ -104,7 +102,6 @@ nav a.active {
     line-height: 1.8;
 }
 
-/* 예약 목록 */
 .reservation-section {
     padding-bottom: 80px;
 }
@@ -153,6 +150,31 @@ nav a.active {
     color: #7a6f66;
 }
 
+.status-waiting-payment {
+    background: #fff4df;
+    color: #a56a00;
+}
+
+.status-paid {
+    background: #e8f3ff;
+    color: #2f65a8;
+}
+
+.status-confirmed {
+    background: #e7f5ea;
+    color: #2f7a43;
+}
+
+.status-canceled {
+    background: #fdeaea;
+    color: #b04747;
+}
+
+.status-completed {
+    background: #e9eefc;
+    color: #415da8;
+}
+
 .info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -180,6 +202,11 @@ nav a.active {
     line-height: 1.7;
 }
 
+.card-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
 .btn-wrap {
     margin-top: 28px;
     text-align: center;
@@ -204,7 +231,15 @@ nav a.active {
     background: #8f7868;
 }
 
-/* 푸터 */
+.btn-cancel {
+    background: #fdeaea;
+    color: #b04747;
+}
+
+.btn-cancel:hover {
+    opacity: 0.9;
+}
+
 footer {
     background: #2f2f2f;
     color: #ddd;
@@ -240,6 +275,10 @@ footer {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+    }
+
+    .card-actions {
+        text-align: left;
     }
 }
 </style>
@@ -374,12 +413,12 @@ async function loadMyReservations(userId) {
             card.innerHTML = `
                 <div class="card-header">
                     <div class="card-title">${r.serviceName}</div>
-                    <div class="status-badge">${getStatusText(r.status)}</div>
+                    ${getStatusBadge(r.status)}
                 </div>
 
                 <div class="info-grid">
                     <div class="info-item"><strong>예약자</strong> ${r.name}</div>
-                    <div class="info-item"><strong>연락처</strong> ${r.phone}</div>
+                    <div class="info-item"><strong>연락처</strong> ${formatPhone(r.phone)}</div>
                     <div class="info-item"><strong>날짜</strong> ${r.reservationDate}</div>
                     <div class="info-item"><strong>시간</strong> ${formatTime(r.reservationTime)}</div>
                     <div class="info-item"><strong>소요시간</strong> ${r.durationMinutes}분</div>
@@ -390,6 +429,8 @@ async function loadMyReservations(userId) {
                     <strong>요청사항</strong><br>
                     ${r.requestMemo || "작성된 요청사항이 없습니다."}
                 </div>
+
+                ${renderCancelButton(r)}
             `;
 
             list.appendChild(card);
@@ -401,19 +442,108 @@ async function loadMyReservations(userId) {
     }
 }
 
+function renderCancelButton(reservation) {
+    if (
+        reservation.status !== "PAID" &&
+        reservation.status !== "CONFIRMED"
+    ) {
+        return "";
+    }
+
+    return `
+        <div class="card-actions">
+            <button class="btn btn-cancel" onclick="cancelReservation(${reservation.id})">
+                예약 취소
+            </button>
+        </div>
+    `;
+}
+
+async function cancelReservation(id) {
+    const reason = prompt("취소 사유를 입력해주세요.");
+
+    if (reason === null) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/reservations/${id}/payments/cancel`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                cancelReason: reason,
+                canceledBy: "CUSTOMER"
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "예약 취소 실패");
+        }
+
+        alert("예약 및 결제가 취소되었습니다.");
+        location.reload();
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "예약 취소 중 오류가 발생했습니다.");
+    }
+}
+
 function getStatusText(status) {
     switch (status) {
-        case "PENDING": return "예약 대기";
-        case "CONFIRMED": return "예약 확정";
-        case "COMPLETED": return "시술 완료";
-        case "CANCELED": return "예약 취소";
-        default: return status;
+        case "WAITING_PAYMENT":
+            return "결제 대기";
+        case "PAID":
+            return "결제 완료";
+        case "CONFIRMED":
+            return "예약 확정";
+        case "COMPLETED":
+            return "시술 완료";
+        case "CANCELED":
+            return "예약 취소";
+        default:
+            return status;
+    }
+}
+
+function getStatusBadge(status) {
+    switch (status) {
+        case "WAITING_PAYMENT":
+            return `<div class="status-badge status-waiting-payment">결제 대기</div>`;
+        case "PAID":
+            return `<div class="status-badge status-paid">결제 완료</div>`;
+        case "CONFIRMED":
+            return `<div class="status-badge status-confirmed">예약 확정</div>`;
+        case "COMPLETED":
+            return `<div class="status-badge status-completed">시술 완료</div>`;
+        case "CANCELED":
+            return `<div class="status-badge status-canceled">예약 취소</div>`;
+        default:
+            return `<div class="status-badge">${status}</div>`;
     }
 }
 
 function formatTime(time) {
     if (!time) return "";
     return time.substring(0, 5);
+}
+
+function formatPhone(phone) {
+    if (!phone) return "-";
+
+    const onlyNumber = phone.replace(/\D/g, "");
+
+    if (onlyNumber.length === 11) {
+        return onlyNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+    }
+
+    if (onlyNumber.length === 10) {
+        return onlyNumber.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+    }
+
+    return phone;
 }
 </script>
 

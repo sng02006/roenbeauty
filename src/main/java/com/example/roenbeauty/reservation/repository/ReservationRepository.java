@@ -3,6 +3,7 @@ package com.example.roenbeauty.reservation.repository;
 import com.example.roenbeauty.reservation.entity.Reservation;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,4 +38,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     List<Reservation> findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(Long userId);
+
+    List<Reservation> findByStatusAndCreatedAtBefore(
+            ReservationStatus status,
+            LocalDateTime createdAt
+    );
 }

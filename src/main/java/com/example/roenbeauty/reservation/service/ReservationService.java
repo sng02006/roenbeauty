@@ -6,6 +6,9 @@ import com.example.roenbeauty.businesshour.dto.BusinessHourResponseDto;
 import com.example.roenbeauty.businesshour.service.BusinessHourService;
 import com.example.roenbeauty.menu.entity.Menu;
 import com.example.roenbeauty.menu.repository.MenuRepository;
+import com.example.roenbeauty.payment.dto.CheckoutResponseDto;
+import com.example.roenbeauty.payment.entity.Payment;
+import com.example.roenbeauty.payment.repository.PaymentRepository;
 import com.example.roenbeauty.reservation.dto.ReservationCreateRequestDto;
 import com.example.roenbeauty.reservation.dto.ReservationResponseDto;
 import com.example.roenbeauty.reservation.dto.ReservationUpdateStatusRequestDto;
@@ -25,28 +28,33 @@ import java.util.List;
 @Service
 public class ReservationService {
 
+    private static final int DEPOSIT_AMOUNT = 10000;
+
     private final ReservationRepository reservationRepository;
     private final MenuRepository menuRepository;
     private final BusinessHourService businessHourService;
     private final BlockedTimeRepository blockedTimeRepository;
     private final UserRepository userRepository;
+    private final PaymentRepository paymentRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             MenuRepository menuRepository,
             BusinessHourService businessHourService,
             BlockedTimeRepository blockedTimeRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            PaymentRepository paymentRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.menuRepository = menuRepository;
         this.businessHourService = businessHourService;
         this.blockedTimeRepository = blockedTimeRepository;
         this.userRepository = userRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @Transactional
-    public ReservationResponseDto createReservation(ReservationCreateRequestDto requestDto) {
+    public CheckoutResponseDto createReservation(ReservationCreateRequestDto requestDto) {
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
 
@@ -68,13 +76,33 @@ public class ReservationService {
                 requestDto.getReservationTime(),
                 menu.getName(),
                 requestDto.getRequestMemo(),
-                ReservationStatus.PENDING,
+                ReservationStatus.WAITING_PAYMENT,
                 menu.getDurationMinutes(),
                 user
         );
 
         Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponseDto.from(savedReservation);
+
+        String orderId = "reservation-" + savedReservation.getId();
+        String orderName = "Roen Beauty 예약금";
+
+        Payment payment = new Payment(
+                savedReservation,
+                orderId,
+                DEPOSIT_AMOUNT
+        );
+
+        Payment savedPayment = paymentRepository.save(payment);
+
+        return new CheckoutResponseDto(
+                savedReservation.getId(),
+                savedPayment.getId(),
+                savedPayment.getOrderId(),
+                orderName,
+                savedPayment.getAmount(),
+                savedReservation.getName(),
+                savedReservation.getUser().getEmail()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -225,9 +253,15 @@ public class ReservationService {
             throw new IllegalArgumentException("이미 종료된 예약은 상태 변경이 불가능합니다.");
         }
 
-        if (current == ReservationStatus.PENDING) {
+        if (current == ReservationStatus.WAITING_PAYMENT) {
+            if (target != ReservationStatus.PAID && target != ReservationStatus.CANCELED) {
+                throw new IllegalArgumentException("결제 대기 상태에서는 결제 완료 또는 취소만 가능합니다.");
+            }
+        }
+
+        if (current == ReservationStatus.PAID) {
             if (target != ReservationStatus.CONFIRMED && target != ReservationStatus.CANCELED) {
-                throw new IllegalArgumentException("대기 상태에서는 확정 또는 취소만 가능합니다.");
+                throw new IllegalArgumentException("결제 완료 상태에서는 확정 또는 취소만 가능합니다.");
             }
         }
 

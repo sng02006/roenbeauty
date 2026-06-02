@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제 실패 | Roen Beauty</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Noto Sans KR", sans-serif;
+    background: #f8f6f3;
+}
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    background: white;
+    width: 500px;
+    max-width: 90%;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin-bottom: 12px;
+}
+
+p {
+    color: #666;
+    line-height: 1.8;
+}
+
+.btn {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 12px 24px;
+    border-radius: 30px;
+    background: #a38b7b;
+    color: white;
+    text-decoration: none;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+
+        <div class="icon">❌</div>
+
+        <h1>결제가 취소되었습니다</h1>
+
+        <p id="message"></p>
+
+        <a href="/reservation.html" class="btn">
+            다시 예약하기
+        </a>
+
+    </div>
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const code = params.get("code");
+const message = params.get("message");
+
+document.getElementById("message").innerHTML =
+    `
+    ${message ?? "결제가 진행되지 않았습니다."}
+    <br><br>
+    오류 코드 : ${code ?? "-"}
+    `;
+
+</script>
+
+</body>
+</html>
