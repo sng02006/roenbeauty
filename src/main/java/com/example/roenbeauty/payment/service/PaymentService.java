@@ -1,6 +1,7 @@
 package com.example.roenbeauty.payment.service;
 
 import com.example.roenbeauty.payment.client.TossPaymentClient;
+import com.example.roenbeauty.payment.dto.CheckoutResponseDto;
 import com.example.roenbeauty.payment.dto.PaymentCancelRequestDto;
 import com.example.roenbeauty.payment.dto.PaymentConfirmRequestDto;
 import com.example.roenbeauty.payment.dto.PaymentResponseDto;
@@ -133,5 +134,33 @@ public class PaymentService {
         );
 
         return PaymentResponseDto.from(payment);
+    }
+
+    @Transactional(readOnly = true)
+    public CheckoutResponseDto getCheckoutInfo(Long reservationId) {
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 예약이 존재하지 않습니다."));
+
+        if (reservation.getStatus() != ReservationStatus.WAITING_PAYMENT) {
+            throw new IllegalArgumentException("결제 대기 상태의 예약만 결제를 이어서 진행할 수 있습니다.");
+        }
+
+        Payment payment = paymentRepository.findByReservation(reservation)
+                .orElseThrow(() -> new IllegalArgumentException("결제 정보가 존재하지 않습니다."));
+
+        if (payment.getStatus() != PaymentStatus.READY) {
+            throw new IllegalArgumentException("결제를 이어서 진행할 수 없는 상태입니다.");
+        }
+
+        return new CheckoutResponseDto(
+                reservation.getId(),
+                payment.getId(),
+                payment.getOrderId(),
+                "Roen Beauty 예약금",
+                payment.getAmount(),
+                reservation.getName(),
+                reservation.getUser().getEmail()
+        );
     }
 }

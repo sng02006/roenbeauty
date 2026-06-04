@@ -1,5 +1,6 @@
 package com.example.roenbeauty.payment.controller;
 
+import com.example.roenbeauty.payment.dto.CheckoutResponseDto;
 import com.example.roenbeauty.payment.dto.PaymentCancelRequestDto;
 import com.example.roenbeauty.payment.dto.PaymentConfirmRequestDto;
 import com.example.roenbeauty.payment.dto.PaymentResponseDto;
@@ -29,6 +30,13 @@ public class PaymentController {
             @PathVariable("reservationId") Long reservationId
     ) {
         return paymentService.getPayment(reservationId);
+    }
+
+    @GetMapping("/checkout")
+    public CheckoutResponseDto getCheckoutInfo(
+            @PathVariable("reservationId") Long reservationId
+    ) {
+        return paymentService.getCheckoutInfo(reservationId);
     }
 
     @PostMapping("/cancel")

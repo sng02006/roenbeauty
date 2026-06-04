@@ -340,7 +340,11 @@ footer {
     © 2026 Roen Beauty
 </footer>
 
+<script src="https://js.tosspayments.com/v2/standard"></script>
+
 <script>
+const TOSS_CLIENT_KEY = "test_ck_ALnQvDd2VJG4WWjqZnabrMj7X41m";
+
 document.addEventListener("DOMContentLoaded", async function () {
     const user = JSON.parse(localStorage.getItem("user"));
 
@@ -430,7 +434,7 @@ async function loadMyReservations(userId) {
                     ${r.requestMemo || "작성된 요청사항이 없습니다."}
                 </div>
 
-                ${renderCancelButton(r)}
+                ${renderActionButton(r)}
             `;
 
             list.appendChild(card);
@@ -442,21 +446,91 @@ async function loadMyReservations(userId) {
     }
 }
 
-function renderCancelButton(reservation) {
-    if (
-        reservation.status !== "PAID" &&
-        reservation.status !== "CONFIRMED"
-    ) {
-        return "";
+function renderActionButton(reservation) {
+
+    if (reservation.status === "WAITING_PAYMENT") {
+        return `
+            <div class="card-actions">
+                <button
+                    class="btn btn-main"
+                    onclick="continuePayment(${reservation.id})">
+                    결제 이어하기
+                </button>
+            </div>
+        `;
     }
 
-    return `
-        <div class="card-actions">
-            <button class="btn btn-cancel" onclick="cancelReservation(${reservation.id})">
-                예약 취소
-            </button>
-        </div>
-    `;
+    if (
+        reservation.status === "PAID" ||
+        reservation.status === "CONFIRMED"
+    ) {
+        return `
+            <div class="card-actions">
+                <button
+                    class="btn btn-cancel"
+                    onclick="cancelReservation(${reservation.id})">
+                    예약 취소
+                </button>
+            </div>
+        `;
+    }
+
+    return "";
+}
+
+async function continuePayment(reservationId) {
+
+    try {
+
+        const response = await fetch(
+            `/api/reservations/${reservationId}/payments/checkout`
+        );
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        const checkout = await response.json();
+
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+
+        const payment = tossPayments.payment({
+            customerKey: "USER_" + user.userId
+        });
+
+        await payment.requestPayment({
+            method: "CARD",
+
+            amount: {
+                currency: "KRW",
+                value: checkout.amount
+            },
+
+            orderId: checkout.orderId,
+            orderName: checkout.orderName,
+
+            customerName: checkout.customerName,
+            customerEmail: checkout.customerEmail,
+
+            successUrl:
+                `${window.location.origin}/payment-success.html?reservationId=${reservationId}`,
+
+            failUrl:
+                `${window.location.origin}/payment-fail.html?reservationId=${reservationId}`
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            error.message ||
+            "결제를 이어서 진행할 수 없습니다."
+        );
+    }
 }
 
 async function cancelReservation(id) {
@@ -546,6 +620,5 @@ function formatPhone(phone) {
     return phone;
 }
 </script>
-
 </body>
 </html>
