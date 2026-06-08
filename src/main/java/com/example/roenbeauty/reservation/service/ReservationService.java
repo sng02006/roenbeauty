@@ -108,25 +108,37 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationResponseDto> getReservations(
             ReservationStatus status,
-            LocalDate reservationDate
+            LocalDate reservationDate,
+            String keyword
     ) {
-        List<Reservation> reservations;
+        return reservationRepository
+                .findAllByOrderByReservationDateAscReservationTimeAsc()
+                .stream()
+                .filter(reservation ->
+                        status == null ||
+                        reservation.getStatus() == status
+                )
+                .filter(reservation ->
+                        reservationDate == null ||
+                        reservation.getReservationDate().equals(reservationDate)
+                )
+                .filter(reservation -> {
+                    if (keyword == null || keyword.isBlank()) {
+                        return true;
+                    }
 
-        if (status != null && reservationDate != null) {
-            reservations = reservationRepository
-                    .findByStatusAndReservationDateOrderByReservationTimeAsc(status, reservationDate);
-        } else if (status != null) {
-            reservations = reservationRepository
-                    .findByStatusOrderByReservationDateAscReservationTimeAsc(status);
-        } else if (reservationDate != null) {
-            reservations = reservationRepository
-                    .findByReservationDateOrderByReservationTimeAsc(reservationDate);
-        } else {
-            reservations = reservationRepository
-                    .findAllByOrderByReservationDateAscReservationTimeAsc();
-        }
+                    String normalizedKeyword = keyword.replaceAll("\\s", "");
+                    String normalizedName = reservation.getName().replaceAll("\\s", "");
 
-        return reservations.stream()
+                    String numberKeyword = keyword.replaceAll("\\D", "");
+                    String normalizedPhone = reservation.getPhone().replaceAll("\\D", "");
+
+                    boolean nameMatched = normalizedName.contains(normalizedKeyword);
+                    boolean phoneMatched = !numberKeyword.isBlank()
+                            && normalizedPhone.contains(numberKeyword);
+
+                    return nameMatched || phoneMatched;
+                })
                 .map(ReservationResponseDto::from)
                 .toList();
     }

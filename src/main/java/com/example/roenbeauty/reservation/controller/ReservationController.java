@@ -32,9 +32,10 @@ public class ReservationController {
             @RequestParam(name = "status", required = false) ReservationStatus status,
             @RequestParam(name = "reservationDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate reservationDate
+            LocalDate reservationDate,
+            @RequestParam(name = "keyword", required = false) String keyword
     ) {
-        return reservationService.getReservations(status, reservationDate);
+        return reservationService.getReservations(status, reservationDate, keyword);
     }
 
     @PatchMapping("/{id}/status")

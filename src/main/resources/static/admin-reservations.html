@@ -81,32 +81,89 @@ nav a.active {
     line-height: 1.7;
 }
 
-.filter-wrap {
-    display: flex;
+.search-panel {
+    display: grid;
+    gap: 14px;
     justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin: 10px 0 30px;
+    margin: 10px 0 34px;
 }
 
-.filter-btn {
-    padding: 10px 18px;
-    border-radius: 30px;
-    border: 1px solid #d6d0c9;
-    background: white;
-    color: #7a6f66;
+.search-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.search-label {
     font-size: 14px;
+    font-weight: 700;
+    color: #7a6f66;
+}
+
+.search-row input,
+.search-row select {
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid #d6d0c9;
+    border-radius: 14px;
+    background: white;
+    color: #555;
+    font-size: 14px;
+}
+
+#reservationDateFilter {
+    width: 190px;
+}
+
+#statusFilter {
+    width: 150px;
+}
+
+#keywordFilter {
+    width: 260px;
+}
+
+.quick-btn,
+.search-btn,
+.reset-btn {
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
     transition: 0.2s;
 }
 
-.filter-btn.active {
-    background: #a38b7b;
-    color: white;
-    border-color: #a38b7b;
+.quick-btn {
+    border: 1px solid #d6d0c9;
+    background: white;
+    color: #7a6f66;
 }
 
-.filter-btn:hover {
+.quick-btn:hover {
+    background: #f3f1ee;
+}
+
+.search-btn {
+    border: none;
+    background: #a38b7b;
+    color: white;
+}
+
+.search-btn:hover {
+    background: #8f7868;
+}
+
+.reset-btn {
+    border: 1px solid #d6d0c9;
+    background: white;
+    color: #7a6f66;
+}
+
+.reset-btn:hover {
     background: #f3f1ee;
 }
 
@@ -312,26 +369,6 @@ footer {
     font-size: 14px;
 }
 
-@media (max-width: 768px) {
-    .header-inner {
-        flex-direction: column;
-        justify-content: center;
-        gap: 10px;
-        height: auto;
-        padding: 16px 0;
-    }
-
-    nav ul {
-        gap: 16px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .page-hero h1 {
-        font-size: 30px;
-    }
-}
-
 .auth-box {
     display: flex;
     align-items: center;
@@ -350,6 +387,26 @@ footer {
 
 .auth-btn:hover {
     background: #f3f1ee;
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        height: auto;
+        padding: 16px 0;
+    }
+
+    nav ul {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-hero h1 {
+        font-size: 30px;
+    }
 }
 </style>
 </head>
@@ -396,13 +453,36 @@ footer {
 <section class="admin-section">
     <div class="container">
 
-        <div class="filter-wrap">
-            <button class="filter-btn active" data-status="ALL">전체</button>
-            <button class="filter-btn" data-status="WAITING_PAYMENT">결제 대기</button>
-            <button class="filter-btn" data-status="PAID">결제 완료</button>
-            <button class="filter-btn" data-status="CONFIRMED">확정</button>
-            <button class="filter-btn" data-status="CANCELED">취소</button>
-            <button class="filter-btn" data-status="COMPLETED">완료</button>
+        <div class="search-panel">
+            <div class="search-row">
+                <span class="search-label">예약일 선택</span>
+                <input type="date" id="reservationDateFilter">
+                <button class="quick-btn" onclick="setToday()">오늘</button>
+                <button class="quick-btn" onclick="setTomorrow()">내일</button>
+            </div>
+
+            <div class="search-row">
+                <select id="statusFilter">
+                    <option value="ALL">전체 상태</option>
+                    <option value="WAITING_PAYMENT">결제 대기</option>
+                    <option value="PAID">결제 완료</option>
+                    <option value="CONFIRMED">확정</option>
+                    <option value="CANCELED">취소</option>
+                    <option value="COMPLETED">완료</option>
+                </select>
+
+                <input
+                        type="text"
+                        id="keywordFilter"
+                        placeholder="이름 또는 연락처 검색"
+                >
+
+                <button class="search-btn" onclick="searchReservations()">검색</button>
+            </div>
+
+            <div class="search-row">
+                <button class="reset-btn" onclick="resetSearchConditions()">초기화</button>
+            </div>
         </div>
 
         <div id="loadingMessage" class="loading-message">예약 목록을 불러오는 중입니다...</div>
@@ -446,6 +526,8 @@ footer {
 
 <script>
 let currentStatus = "ALL";
+let currentReservationDate = "";
+let currentKeyword = "";
 let reservationMap = {};
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -476,19 +558,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         location.href = "/index.html";
     });
 
-    document.querySelectorAll(".filter-btn").forEach(button => {
-        button.addEventListener("click", async function () {
-            document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-
-            currentStatus = this.dataset.status;
-            hideCancelReasonPopup();
-            await loadReservations();
-        });
-    });
-
     document.addEventListener("click", function () {
         hideCancelReasonPopup();
+    });
+
+    document.getElementById("keywordFilter").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            searchReservations();
+        }
     });
 
     await loadReservations();
@@ -528,6 +605,8 @@ async function loadReservations() {
     } catch (error) {
         console.error(error);
         loadingMessage.style.display = "none";
+        emptyMessage.style.display = "none";
+        tableCard.style.display = "none";
         errorMessage.style.display = "block";
     }
 }
@@ -539,13 +618,19 @@ function buildReservationApiUrl() {
         params.append("status", currentStatus);
     }
 
-    const queryString = params.toString();
-
-    if (!queryString) {
-        return "/api/reservations";
+    if (currentReservationDate) {
+        params.append("reservationDate", currentReservationDate);
     }
 
-    return `/api/reservations?${queryString}`;
+    if (currentKeyword) {
+        params.append("keyword", currentKeyword);
+    }
+
+    const queryString = params.toString();
+
+    return queryString
+        ? `/api/reservations?${queryString}`
+        : "/api/reservations";
 }
 
 function renderReservations(reservations) {
@@ -676,6 +761,55 @@ function getStatusBadge(status) {
         default:
             return status;
     }
+}
+
+function searchReservations() {
+    currentStatus = document.getElementById("statusFilter").value;
+    currentReservationDate = document.getElementById("reservationDateFilter").value;
+    currentKeyword = document.getElementById("keywordFilter").value.trim();
+
+    hideCancelReasonPopup();
+    loadReservations();
+}
+
+function resetSearchConditions() {
+    currentStatus = "ALL";
+    currentReservationDate = "";
+    currentKeyword = "";
+
+    document.getElementById("statusFilter").value = "ALL";
+    document.getElementById("reservationDateFilter").value = "";
+    document.getElementById("keywordFilter").value = "";
+
+    hideCancelReasonPopup();
+    loadReservations();
+}
+
+function setToday() {
+    const today = new Date();
+
+    document.getElementById("reservationDateFilter").value =
+        formatLocalDate(today);
+
+    searchReservations();
+}
+
+function setTomorrow() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    document.getElementById("reservationDateFilter").value =
+        formatLocalDate(tomorrow);
+
+    searchReservations();
+}
+
+function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
 }
 
 function formatDateTime(dateTime) {
