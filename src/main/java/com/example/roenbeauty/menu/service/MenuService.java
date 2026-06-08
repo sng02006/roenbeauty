@@ -8,6 +8,7 @@ import com.example.roenbeauty.menu.enums.MenuCategory;
 import com.example.roenbeauty.menu.repository.MenuRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MenuService {
@@ -48,15 +49,22 @@ public class MenuService {
                 .toList();
     }
 
+    @Transactional
     public MenuResponseDto updateMenu(Long id, MenuUpdateRequestDto requestDto) {
         Menu menu = menuRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
 
+        Integer priceValue = requestDto.getPriceValue();
+
+        String priceText = priceValue == null || priceValue <= 0
+                ? ""
+                : String.format("%,d", priceValue);
+
         menu.update(
                 requestDto.getName(),
                 requestDto.getDescription(),
-                requestDto.getPriceText(),
-                requestDto.getPriceValue(),
+                priceText,
+                priceValue,
                 requestDto.getCategory(),
                 requestDto.getVisible(),
                 requestDto.getSortOrder(),
@@ -64,5 +72,12 @@ public class MenuService {
         );
 
         return MenuResponseDto.from(menu);
+    }
+
+    public List<MenuResponseDto> getAllMenusForAdmin() {
+        return menuRepository.findAllByOrderByCategoryAscSortOrderAsc()
+                .stream()
+                .map(MenuResponseDto::from)
+                .toList();
     }
 }

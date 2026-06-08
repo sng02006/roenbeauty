@@ -29,15 +29,22 @@ public class MenuController {
     }
 
     @GetMapping("/category/{category}")
-    public List<MenuResponseDto> getMenusByCategory(@PathVariable MenuCategory category) {
+    public List<MenuResponseDto> getMenusByCategory(
+            @PathVariable("category") MenuCategory category
+    ) {
         return menuService.getMenusByCategory(category);
     }
 
     @PutMapping("/{id}")
     public MenuResponseDto updateMenu(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody MenuUpdateRequestDto requestDto
     ) {
         return menuService.updateMenu(id, requestDto);
+    }
+
+    @GetMapping("/admin")
+    public List<MenuResponseDto> getAllMenusForAdmin() {
+        return menuService.getAllMenusForAdmin();
     }
 }

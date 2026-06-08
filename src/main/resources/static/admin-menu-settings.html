@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>메뉴 관리 | Roen Beauty</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+body {
+    font-family: "Noto Sans KR", sans-serif;
+    background: #f8f6f3;
+    color: #333;
+}
+
+.container {
+    width: min(1200px, 92%);
+    margin: 0 auto;
+}
+
+header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid #eee;
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 600;
+    color: #7a6f66;
+}
+
+nav ul {
+    display: flex;
+    gap: 25px;
+    list-style: none;
+}
+
+nav a {
+    font-size: 14px;
+    color: #666;
+    transition: 0.2s;
+}
+
+nav a:hover,
+nav a.active {
+    color: #a38b7b;
+    font-weight: 600;
+}
+
+.auth-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-btn {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #d6d0c9;
+    background: white;
+    color: #7a6f66;
+    transition: 0.2s;
+}
+
+.auth-btn:hover {
+    background: #f3f1ee;
+}
+
+.page-hero {
+    padding: 70px 0 30px;
+    text-align: center;
+}
+
+.page-hero h1 {
+    font-size: 38px;
+    color: #2f2f2f;
+    margin-bottom: 12px;
+}
+
+.page-hero p {
+    color: #777;
+    line-height: 1.7;
+}
+
+.admin-section {
+    padding-bottom: 80px;
+}
+
+.filter-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #7a6f66;
+}
+
+#categoryFilter {
+    width: 180px;
+    height: 46px;
+}
+
+.table-card {
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+thead {
+    background: #f5f1ec;
+}
+
+th,
+td {
+    padding: 15px 14px;
+    text-align: center;
+    border-bottom: 1px solid #f0ebe5;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+th {
+    color: #6c635c;
+    font-weight: 700;
+}
+
+td {
+    color: #333;
+}
+
+input,
+select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #ddd5ce;
+    border-radius: 12px;
+    background: white;
+    font-size: 14px;
+    color: #555;
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    border-color: #a38b7b;
+    box-shadow: 0 0 0 3px rgba(163, 139, 123, 0.12);
+}
+
+.category-select {
+    min-width: 120px;
+}
+
+.visible-select {
+    min-width: 90px;
+}
+
+.save-btn {
+    height: 42px;
+    min-width: 80px;
+    padding: 0 20px;
+    border-radius: 30px;
+    border: none;
+    background: #a38b7b;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.save-btn:hover {
+    background: #8f7868;
+    transform: translateY(-1px);
+}
+
+.loading-message,
+.empty-message,
+.error-message {
+    text-align: center;
+    color: #6f665f;
+    font-size: 16px;
+    margin: 24px 0;
+}
+
+.btn-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+.btn-main {
+    background: #a38b7b;
+    color: white;
+}
+
+.btn-main:hover {
+    background: #8f7868;
+}
+
+.btn-sub {
+    border: 1px solid #d6d0c9;
+    color: #7a6f66;
+    background: white;
+}
+
+.btn-sub:hover {
+    background: #f3f1ee;
+}
+
+footer {
+    background: #2f2f2f;
+    color: #ddd;
+    text-align: center;
+    padding: 25px;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        height: auto;
+        padding: 16px 0;
+    }
+
+    nav ul {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-hero h1 {
+        font-size: 30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="container header-inner">
+        <div class="logo"><a href="/index.html">Roen Beauty</a></div>
+
+        <nav>
+            <ul>
+                <li><a href="/index.html">메인</a></li>
+                <li><a href="/services.html">시술 메뉴</a></li>
+                <li><a href="/gallery.html">갤러리</a></li>
+                <li><a href="/reservation.html">예약하기</a></li>
+
+                <li class="my-menu" style="display:none;">
+                    <a href="/my-reservations.html">내 예약</a>
+                </li>
+
+                <li class="admin-menu" style="display:none;">
+                    <a href="/admin-reservations.html">예약 관리</a>
+                </li>
+
+                <li class="admin-menu" style="display:none;">
+                    <a href="/admin-menu-settings.html" class="active">메뉴 관리</a>
+                </li>
+
+                <li class="admin-menu" style="display:none;">
+                    <a href="/admin-blocked-times.html">영업 시간 관리</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="auth-box">
+            <a href="/login.html" id="loginBtn" class="auth-btn">로그인</a>
+            <a href="/signup.html" id="signupBtn" class="auth-btn">회원가입</a>
+            <a href="#" id="logoutBtn" class="auth-btn" style="display:none;">로그아웃</a>
+        </div>
+    </div>
+</header>
+
+<div class="page-hero">
+    <div class="container">
+        <h1>메뉴 관리</h1>
+        <p>시술 메뉴의 카테고리, 가격, 소요시간, 노출 여부, 정렬 순서를 관리할 수 있습니다.</p>
+    </div>
+</div>
+
+<section class="admin-section">
+    <div class="container">
+
+        <div class="filter-panel">
+            <span class="filter-label">카테고리 필터</span>
+            <select id="categoryFilter">
+                <option value="ALL">전체</option>
+                <option value="NAIL">네일</option>
+                <option value="OPTION">옵션</option>
+                <option value="PEDI">패디</option>
+                <option value="EYELASH">속눈썹</option>
+                <option value="REMOVE">제거</option>
+                <option value="MEMBERSHIP">멤버십</option>
+            </select>
+        </div>
+
+        <div id="loadingMessage" class="loading-message">메뉴 목록을 불러오는 중입니다...</div>
+        <div id="errorMessage" class="error-message" style="display:none;">메뉴 목록을 불러오지 못했습니다.</div>
+        <div id="emptyMessage" class="empty-message" style="display:none;">등록된 메뉴가 없습니다.</div>
+
+        <div id="tableCard" class="table-card" style="display:none;">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>카테고리</th>
+                            <th>메뉴명</th>
+                            <th>가격</th>
+                            <th>소요시간</th>
+                            <th>노출</th>
+                            <th>정렬순서</th>
+                            <th style="width:120px;">저장</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="menuTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="btn-wrap">
+            <a href="/services.html" class="btn btn-main">시술 메뉴로</a>
+            <a href="/index.html" class="btn btn-sub">메인으로 돌아가기</a>
+        </div>
+
+    </div>
+</section>
+
+<footer>
+    © 2026 Roen Beauty
+</footer>
+
+<script>
+let allMenus = [];
+
+document.addEventListener("DOMContentLoaded", function () {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user || (user.role !== "ADMIN" && user.role !== "OWNER")) {
+        alert("관리자만 접근할 수 있습니다.");
+        location.href = "/index.html";
+        return;
+    }
+
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    loginBtn.style.display = "none";
+    signupBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+
+    document.querySelectorAll(".my-menu")
+        .forEach(menu => menu.style.display = "block");
+
+    document.querySelectorAll(".admin-menu")
+        .forEach(menu => menu.style.display = "block");
+
+    logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        localStorage.removeItem("user");
+        location.href = "/index.html";
+    });
+
+    document.getElementById("categoryFilter").addEventListener("change", function () {
+        renderMenusByFilter();
+    });
+
+    loadMenus();
+});
+
+async function loadMenus() {
+    const loadingMessage = document.getElementById("loadingMessage");
+    const errorMessage = document.getElementById("errorMessage");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const tableCard = document.getElementById("tableCard");
+    const tbody = document.getElementById("menuTableBody");
+
+    loadingMessage.style.display = "block";
+    errorMessage.style.display = "none";
+    emptyMessage.style.display = "none";
+    tableCard.style.display = "none";
+    tbody.innerHTML = "";
+
+    try {
+        const response = await fetch("/api/menus/admin");
+
+        if (!response.ok) {
+            throw new Error("메뉴 조회 실패");
+        }
+
+        allMenus = await response.json();
+
+        loadingMessage.style.display = "none";
+
+        renderMenusByFilter();
+    } catch (error) {
+        console.error(error);
+        loadingMessage.style.display = "none";
+        tableCard.style.display = "none";
+        errorMessage.style.display = "block";
+    }
+}
+
+function renderMenusByFilter() {
+    const selectedCategory = document.getElementById("categoryFilter").value;
+
+    const filteredMenus = selectedCategory === "ALL"
+        ? allMenus
+        : allMenus.filter(menu => menu.category === selectedCategory);
+
+    renderMenus(filteredMenus);
+}
+
+function renderMenus(menus) {
+    const emptyMessage = document.getElementById("emptyMessage");
+    const tableCard = document.getElementById("tableCard");
+    const tbody = document.getElementById("menuTableBody");
+
+    tbody.innerHTML = "";
+    emptyMessage.style.display = "none";
+    tableCard.style.display = "none";
+
+    if (!menus || menus.length === 0) {
+        emptyMessage.style.display = "block";
+        return;
+    }
+
+    menus.forEach(menu => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>
+                <select id="category-${menu.id}" class="category-select">
+                    ${renderCategoryOptions(menu.category)}
+                </select>
+            </td>
+
+            <td>
+                <input
+                    id="name-${menu.id}"
+                    value="${escapeHtml(menu.name)}">
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    id="price-${menu.id}"
+                    value="${menu.priceValue}">
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    id="duration-${menu.id}"
+                    value="${menu.durationMinutes}">
+            </td>
+
+            <td>
+                <select id="visible-${menu.id}" class="visible-select">
+                    <option value="true" ${menu.visible ? "selected" : ""}>노출</option>
+                    <option value="false" ${!menu.visible ? "selected" : ""}>숨김</option>
+                </select>
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    id="sort-${menu.id}"
+                    value="${menu.sortOrder}">
+            </td>
+
+            <td>
+                <button
+                    class="save-btn"
+                    onclick="updateMenu(${menu.id})">
+                    저장
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    tableCard.style.display = "block";
+}
+
+function renderCategoryOptions(selectedCategory) {
+    const categories = [
+        { value: "NAIL", text: "네일" },
+        { value: "OPTION", text: "옵션" },
+        { value: "PEDI", text: "패디" },
+        { value: "EYELASH", text: "속눈썹" },
+        { value: "REMOVE", text: "제거" },
+        { value: "MEMBERSHIP", text: "멤버십" }
+    ];
+
+    return categories.map(category => {
+        const selected = category.value === selectedCategory ? "selected" : "";
+        return `<option value="${category.value}" ${selected}>${category.text}</option>`;
+    }).join("");
+}
+
+async function updateMenu(menuId) {
+    const name = document.getElementById(`name-${menuId}`).value.trim();
+    const priceValue = Number(document.getElementById(`price-${menuId}`).value);
+    const durationMinutes = Number(document.getElementById(`duration-${menuId}`).value);
+    const visible = document.getElementById(`visible-${menuId}`).value === "true";
+    const sortOrder = Number(document.getElementById(`sort-${menuId}`).value);
+    const category = document.getElementById(`category-${menuId}`).value;
+
+    if (!name) {
+        alert("메뉴명을 입력해주세요.");
+        return;
+    }
+
+    if (priceValue < 0) {
+        alert("가격은 0원 이상이어야 합니다.");
+        return;
+    }
+
+    if (durationMinutes < 0) {
+        alert("소요시간은 0분 이상이어야 합니다.");
+        return;
+    }
+
+    const requestBody = {
+        name: name,
+        priceValue: priceValue,
+        durationMinutes: durationMinutes,
+        visible: visible,
+        sortOrder: sortOrder,
+        category: category,
+        description: "",
+        priceText: ""
+    };
+
+    try {
+        const response = await fetch(`/api/menus/${menuId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "메뉴 저장 실패");
+        }
+
+        alert("메뉴가 저장되었습니다.");
+        await loadMenus();
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "메뉴 저장 중 오류가 발생했습니다.");
+    }
+}
+
+function escapeHtml(value) {
+    if (!value) {
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+}
+</script>
+
+</body>
+</html>

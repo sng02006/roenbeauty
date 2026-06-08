@@ -259,15 +259,19 @@ footer {
                 <li><a href="/gallery.html">갤러리</a></li>
                 <li><a href="/reservation.html">예약하기</a></li>
 
-                <li id="myReservationMenu" style="display:none;">
+                <li class="my-menu" style="display:none;">
                     <a href="/my-reservations.html">내 예약</a>
                 </li>
 
-                <li id="adminMenu" style="display:none;">
+                <li class="admin-menu" style="display:none;">
                     <a href="/admin-reservations.html">예약 관리</a>
                 </li>
 
-                <li id="adminMenu2" style="display:none;">
+                <li class="admin-menu" style="display:none;">
+                    <a href="/admin-menu-settings.html">메뉴 관리</a>
+                </li>
+
+                <li class="admin-menu" style="display:none;">
                     <a href="/admin-blocked-times.html" class="active">영업 시간 관리</a>
                 </li>
             </ul>
@@ -467,13 +471,11 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("loginBtn").style.display = "none";
     document.getElementById("logoutBtn").style.display = "inline-block";
 
-    const myReservationMenu = document.getElementById("myReservationMenu");
-    const adminMenu = document.getElementById("adminMenu");
-    const adminMenu2 = document.getElementById("adminMenu2");
+    document.querySelectorAll(".my-menu")
+        .forEach(menu => menu.style.display = "block");
 
-    if (myReservationMenu) myReservationMenu.style.display = "block";
-    if (adminMenu) adminMenu.style.display = "block";
-    if (adminMenu2) adminMenu2.style.display = "block";
+    document.querySelectorAll(".admin-menu")
+        .forEach(menu => menu.style.display = "block");
 
     document.getElementById("logoutBtn").addEventListener("click", function (e) {
         e.preventDefault();
