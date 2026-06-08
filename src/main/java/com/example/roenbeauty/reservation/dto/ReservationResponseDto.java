@@ -1,6 +1,7 @@
 package com.example.roenbeauty.reservation.dto;
 
 import com.example.roenbeauty.reservation.entity.Reservation;
+import com.example.roenbeauty.reservation.enums.CanceledBy;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
 
 import java.time.LocalDate;
@@ -21,6 +22,10 @@ public class ReservationResponseDto {
     private LocalDateTime updatedAt;
     private Integer durationMinutes;
 
+    private CanceledBy canceledBy;
+    private String cancelReason;
+    private LocalDateTime canceledAt;
+
     public ReservationResponseDto(
             Long id,
             String name,
@@ -32,7 +37,10 @@ public class ReservationResponseDto {
             ReservationStatus status,
             LocalDateTime createdAt,
             LocalDateTime updatedAt,
-            Integer durationMinutes
+            Integer durationMinutes,
+            CanceledBy canceledBy,
+            String cancelReason,
+            LocalDateTime canceledAt
     ) {
         this.id = id;
         this.name = name;
@@ -45,6 +53,9 @@ public class ReservationResponseDto {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.durationMinutes = durationMinutes;
+        this.canceledBy = canceledBy;
+        this.cancelReason = cancelReason;
+        this.canceledAt = canceledAt;
     }
 
     public static ReservationResponseDto from(Reservation reservation) {
@@ -59,7 +70,10 @@ public class ReservationResponseDto {
                 reservation.getStatus(),
                 reservation.getCreatedAt(),
                 reservation.getUpdatedAt(),
-                reservation.getDurationMinutes()
+                reservation.getDurationMinutes(),
+                reservation.getCanceledBy(),
+                reservation.getCancelReason(),
+                reservation.getCanceledAt()
         );
     }
 
@@ -105,5 +119,17 @@ public class ReservationResponseDto {
 
     public Integer getDurationMinutes() {
         return durationMinutes;
+    }
+
+    public CanceledBy getCanceledBy() {
+        return canceledBy;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public LocalDateTime getCanceledAt() {
+        return canceledAt;
     }
 }

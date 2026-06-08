@@ -234,6 +234,31 @@ td {
     color: #415da8;
 }
 
+.btn-sub-reason {
+    background: #f5f1ec;
+    color: #7a6f66;
+}
+
+.cancel-reason-popup {
+    position: absolute;
+    z-index: 9999;
+    min-width: 260px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: white;
+    border: 1px solid #ece7e1;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    color: #6c635c;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.cancel-reason-popup strong {
+    display: inline-block;
+    min-width: 70px;
+    color: #7a6f66;
+}
+
 .action-btn:hover {
     transform: translateY(-1px);
     opacity: 0.9;
@@ -413,12 +438,15 @@ footer {
     </div>
 </section>
 
+<div id="cancelReasonPopup" class="cancel-reason-popup" style="display:none;"></div>
+
 <footer>
     © 2026 Roen Beauty
 </footer>
 
 <script>
 let currentStatus = "ALL";
+let reservationMap = {};
 
 document.addEventListener("DOMContentLoaded", async function () {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -454,8 +482,13 @@ document.addEventListener("DOMContentLoaded", async function () {
             this.classList.add("active");
 
             currentStatus = this.dataset.status;
+            hideCancelReasonPopup();
             await loadReservations();
         });
+    });
+
+    document.addEventListener("click", function () {
+        hideCancelReasonPopup();
     });
 
     await loadReservations();
@@ -518,8 +551,11 @@ function buildReservationApiUrl() {
 function renderReservations(reservations) {
     const tbody = document.getElementById("reservationTableBody");
     tbody.innerHTML = "";
+    reservationMap = {};
 
     reservations.forEach(reservation => {
+        reservationMap[reservation.id] = reservation;
+
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
@@ -558,6 +594,10 @@ function renderActionButtons(reservation) {
         cancelBtn = `<button class="action-btn btn-cancel" onclick="cancelReservation(${reservation.id}, 'OWNER')">취소</button>`;
     }
 
+    else if (reservation.status === "CANCELED") {
+        completeBtn = `<button class="action-btn btn-sub-reason" onclick="toggleCancelReasonPopup(event, ${reservation.id})">사유</button>`;
+    }
+
     return `
         <div class="action-wrap">
             ${confirmBtn}
@@ -565,6 +605,60 @@ function renderActionButtons(reservation) {
             ${cancelBtn}
         </div>
     `;
+}
+
+function toggleCancelReasonPopup(event, reservationId) {
+    event.stopPropagation();
+
+    const popup = document.getElementById("cancelReasonPopup");
+    const reservation = reservationMap[reservationId];
+
+    if (!popup || !reservation) {
+        return;
+    }
+
+    if (
+        popup.style.display === "block" &&
+        popup.dataset.reservationId === String(reservationId)
+    ) {
+        popup.style.display = "none";
+        return;
+    }
+
+    popup.dataset.reservationId = reservationId;
+
+    popup.innerHTML = `
+        <div><strong>취소자</strong> ${getCanceledByText(reservation.canceledBy)}</div>
+        <div><strong>취소 사유</strong> ${reservation.cancelReason || "-"}</div>
+        <div><strong>취소 일시</strong> ${formatDateTime(reservation.canceledAt)}</div>
+    `;
+
+    const rect = event.target.getBoundingClientRect();
+
+    popup.style.left = `${rect.left + window.scrollX}px`;
+    popup.style.top = `${rect.bottom + window.scrollY + 8}px`;
+    popup.style.display = "block";
+}
+
+function hideCancelReasonPopup() {
+    const popup = document.getElementById("cancelReasonPopup");
+
+    if (popup) {
+        popup.style.display = "none";
+    }
+}
+
+function getCanceledByText(canceledBy) {
+    switch (canceledBy) {
+        case "CUSTOMER":
+            return "고객";
+        case "OWNER":
+            return "사장";
+        case "SYSTEM":
+            return "시스템";
+        default:
+            return "-";
+    }
 }
 
 function getStatusBadge(status) {
@@ -631,6 +725,7 @@ async function updateReservationStatus(id, status) {
         }
 
         alert("예약 상태가 변경되었습니다.");
+        hideCancelReasonPopup();
         await loadReservations();
     } catch (error) {
         console.error(error);
@@ -663,6 +758,7 @@ async function cancelReservation(id, canceledBy) {
         }
 
         alert("예약 및 결제가 취소되었습니다.");
+        hideCancelReasonPopup();
         await loadReservations();
     } catch (error) {
         console.error(error);
