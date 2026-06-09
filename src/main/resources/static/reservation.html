@@ -456,17 +456,52 @@ async function loadMenus() {
 
         serviceSelect.innerHTML = `<option value="">시술 메뉴를 선택해주세요</option>`;
 
-        menus.forEach(menu => {
-            const option = document.createElement("option");
-            option.value = menu.id;
-            option.textContent = `${menu.name} (${menu.durationMinutes}분)`;
-            serviceSelect.appendChild(option);
+        const groupedMenus = groupByCategory(menus);
+
+        Object.keys(categoryInfo).forEach(categoryKey => {
+            const items = groupedMenus[categoryKey];
+
+            if (!items || items.length === 0) {
+                return;
+            }
+
+            const optgroup = document.createElement("optgroup");
+            optgroup.label = categoryInfo[categoryKey];
+
+            items.forEach(menu => {
+                const option = document.createElement("option");
+                option.value = menu.id;
+                option.textContent = `${menu.name} (${menu.durationMinutes}분)`;
+                optgroup.appendChild(option);
+            });
+
+            serviceSelect.appendChild(optgroup);
         });
     } catch (error) {
         console.error(error);
         alert("시술 메뉴를 불러오지 못했습니다.");
     }
 }
+
+function groupByCategory(menus) {
+    return menus.reduce((acc, menu) => {
+        if (!acc[menu.category]) {
+            acc[menu.category] = [];
+        }
+
+        acc[menu.category].push(menu);
+        return acc;
+    }, {});
+}
+
+const categoryInfo = {
+    NAIL: "네일",
+    OPTION: "옵션",
+    PEDI: "패디",
+    EYELASH: "속눈썹",
+    REMOVE: "제거",
+    MEMBERSHIP: "멤버십"
+};
 
 async function initReservationDatePicker() {
     const today = new Date();
