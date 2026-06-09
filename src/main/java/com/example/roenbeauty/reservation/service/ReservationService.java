@@ -29,6 +29,8 @@ import java.util.List;
 public class ReservationService {
 
     private static final int DEPOSIT_AMOUNT = 20000;
+    private static final int NIGHT_SURCHARGE_AMOUNT = 10000;
+    private static final int NIGHT_SURCHARGE_START_HOUR = 20;
 
     private final ReservationRepository reservationRepository;
     private final MenuRepository menuRepository;
@@ -85,11 +87,12 @@ public class ReservationService {
 
         String orderId = "reservation-" + savedReservation.getId();
         String orderName = "Roen Beauty 예약금";
+        int paymentAmount = calculateDepositAmount(savedReservation.getReservationTime());
 
         Payment payment = new Payment(
                 savedReservation,
                 orderId,
-                DEPOSIT_AMOUNT
+                paymentAmount
         );
 
         Payment savedPayment = paymentRepository.save(payment);
@@ -214,6 +217,16 @@ public class ReservationService {
         return reservations.stream()
                 .map(ReservationResponseDto::from)
                 .toList();
+    }
+
+    private int calculateDepositAmount(LocalTime reservationTime) {
+        int amount = DEPOSIT_AMOUNT;
+
+        if (reservationTime.getHour() >= NIGHT_SURCHARGE_START_HOUR) {
+            amount += NIGHT_SURCHARGE_AMOUNT;
+        }
+
+        return amount;
     }
 
     private void validateReservationDate(LocalDate reservationDate) {
