@@ -28,7 +28,7 @@ import java.util.List;
 @Service
 public class ReservationService {
 
-    private static final int DEPOSIT_AMOUNT = 10000;
+    private static final int DEPOSIT_AMOUNT = 20000;
 
     private final ReservationRepository reservationRepository;
     private final MenuRepository menuRepository;
