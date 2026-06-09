@@ -19,12 +19,19 @@ public class MenuService {
         this.menuRepository = menuRepository;
     }
 
+    @Transactional
     public MenuResponseDto createMenu(MenuCreateRequestDto requestDto) {
+        Integer priceValue = requestDto.getPriceValue();
+
+        String priceText = priceValue == null || priceValue <= 0
+                ? ""
+                : String.format("%,d", priceValue);
+
         Menu menu = new Menu(
                 requestDto.getName(),
                 requestDto.getDescription(),
-                requestDto.getPriceText(),
-                requestDto.getPriceValue(),
+                priceText,
+                priceValue,
                 requestDto.getCategory(),
                 requestDto.getVisible(),
                 requestDto.getSortOrder(),
@@ -32,6 +39,7 @@ public class MenuService {
         );
 
         Menu savedMenu = menuRepository.save(menu);
+
         return MenuResponseDto.from(savedMenu);
     }
 

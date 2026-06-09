@@ -105,6 +105,27 @@ nav a.active {
     padding-bottom: 80px;
 }
 
+.create-card {
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 20px;
+    padding: 26px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.create-card h3 {
+    margin-bottom: 18px;
+    color: #3f3a36;
+}
+
+.create-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr 1fr 1fr 1fr 120px;
+    gap: 12px;
+    align-items: center;
+}
+
 .filter-panel {
     display: flex;
     justify-content: center;
@@ -267,6 +288,12 @@ footer {
     font-size: 14px;
 }
 
+@media (max-width: 900px) {
+    .create-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
     .header-inner {
         flex-direction: column;
@@ -337,6 +364,31 @@ footer {
 
 <section class="admin-section">
     <div class="container">
+
+        <div class="create-card">
+            <h3>메뉴 추가</h3>
+
+            <div class="create-grid">
+                <select id="newCategory">
+                    <option value="NAIL">네일</option>
+                    <option value="OPTION">옵션</option>
+                    <option value="PEDI">패디</option>
+                    <option value="EYELASH">속눈썹</option>
+                    <option value="REMOVE">제거</option>
+                    <option value="MEMBERSHIP">멤버십</option>
+                </select>
+
+                <input type="text" id="newName" placeholder="메뉴명">
+                <input type="number" id="newPrice" placeholder="가격">
+                <input type="number" id="newDuration" placeholder="소요시간">
+                <select id="newVisible">
+                    <option value="true">노출</option>
+                    <option value="false">숨김</option>
+                </select>
+                <input type="number" id="newSortOrder" placeholder="정렬순서">
+                <button type="button" class="save-btn" onclick="createMenu()">메뉴 추가</button>
+            </div>
+        </div>
 
         <div class="filter-panel">
             <span class="filter-label">카테고리 필터</span>
@@ -558,6 +610,70 @@ function renderCategoryOptions(selectedCategory) {
     }).join("");
 }
 
+async function createMenu() {
+    const category = document.getElementById("newCategory").value;
+    const name = document.getElementById("newName").value.trim();
+    const priceValue = Number(document.getElementById("newPrice").value);
+    const durationMinutes = Number(document.getElementById("newDuration").value);
+    const visible = document.getElementById("newVisible").value === "true";
+    const sortOrderInput = document.getElementById("newSortOrder").value;
+    const sortOrder = sortOrderInput === "" ? getNextSortOrder(category) : Number(sortOrderInput);
+
+    if (!name) {
+        alert("메뉴명을 입력해주세요.");
+        return;
+    }
+
+    if (priceValue < 0) {
+        alert("가격은 0원 이상이어야 합니다.");
+        return;
+    }
+
+    if (durationMinutes < 0) {
+        alert("소요시간은 0분 이상이어야 합니다.");
+        return;
+    }
+
+    const requestBody = {
+        name: name,
+        priceValue: priceValue,
+        durationMinutes: durationMinutes,
+        visible: visible,
+        sortOrder: sortOrder,
+        category: category,
+        description: "",
+        priceText: ""
+    };
+
+    try {
+        const response = await fetch("/api/menus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "메뉴 등록 실패");
+        }
+
+        alert("메뉴가 등록되었습니다.");
+
+        document.getElementById("newName").value = "";
+        document.getElementById("newPrice").value = "";
+        document.getElementById("newDuration").value = "";
+        document.getElementById("newSortOrder").value = "";
+        document.getElementById("newVisible").value = "true";
+
+        await loadMenus();
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "메뉴 등록 중 오류가 발생했습니다.");
+    }
+}
+
 async function updateMenu(menuId) {
     const name = document.getElementById(`name-${menuId}`).value.trim();
     const priceValue = Number(document.getElementById(`price-${menuId}`).value);
@@ -612,6 +728,16 @@ async function updateMenu(menuId) {
         console.error(error);
         alert(error.message || "메뉴 저장 중 오류가 발생했습니다.");
     }
+}
+
+function getNextSortOrder(category) {
+    const sameCategoryMenus = allMenus.filter(menu => menu.category === category);
+
+    if (!sameCategoryMenus || sameCategoryMenus.length === 0) {
+        return 1;
+    }
+
+    return Math.max(...sameCategoryMenus.map(menu => menu.sortOrder || 0)) + 1;
 }
 
 function escapeHtml(value) {
