@@ -40,4 +40,14 @@ public class GalleryController {
     ) {
         return galleryService.updateGallery(id, requestDto);
     }
+
+    @GetMapping("/admin")
+    public List<GalleryResponseDto> getAllGalleries() {
+        return galleryService.getAllGalleries();
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteGallery(@PathVariable Long id) {
+        galleryService.deleteGallery(id);
+    }
 }

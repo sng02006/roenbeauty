@@ -8,6 +8,7 @@ import com.example.roenbeauty.gallery.enums.GalleryCategory;
 import com.example.roenbeauty.gallery.repository.GalleryRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GalleryService {
@@ -60,5 +61,22 @@ public class GalleryService {
         );
 
         return GalleryResponseDto.from(gallery);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GalleryResponseDto> getAllGalleries() {
+        return galleryRepository.findAllByOrderByCategoryAscSortOrderAsc()
+                .stream()
+                .map(GalleryResponseDto::from)
+                .toList();
+    }
+
+    @Transactional
+    public void deleteGallery(Long id) {
+
+        Gallery gallery = galleryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 갤러리입니다."));
+
+        galleryRepository.delete(gallery);
     }
 }

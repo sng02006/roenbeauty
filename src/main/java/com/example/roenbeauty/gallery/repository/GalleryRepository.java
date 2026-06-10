@@ -10,4 +10,6 @@ public interface GalleryRepository extends JpaRepository<Gallery, Long> {
     List<Gallery> findByVisibleTrueOrderByCategoryAscSortOrderAsc();
 
     List<Gallery> findByCategoryAndVisibleTrueOrderBySortOrderAsc(GalleryCategory category);
+
+    List<Gallery> findAllByOrderByCategoryAscSortOrderAsc();
 }
