@@ -164,6 +164,11 @@ textarea {
     color: #7a6f66;
 }
 
+.notice-content {
+    margin-top: 8px;
+    white-space: pre-line;
+}
+
 .btn-wrap {
     display: flex;
     gap: 12px;
@@ -270,6 +275,53 @@ footer {
 .auth-btn:hover {
     background: #f3f1ee;
 }
+
+.admin-dropdown {
+    position: relative;
+}
+
+.admin-dropdown-toggle {
+    cursor: pointer;
+}
+
+.admin-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 160px;
+    padding: 10px 0;
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    list-style: none;
+    z-index: 100;
+}
+
+.admin-dropdown:hover .admin-dropdown-menu {
+    display: block;
+}
+
+.admin-dropdown-menu li {
+    width: 100%;
+}
+
+.admin-dropdown-menu a {
+    display: block;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+}
+
+.admin-dropdown-menu a:hover,
+.admin-dropdown-menu a.active {
+    background: #f8f6f3;
+    color: #a38b7b;
+    font-weight: 600;
+}
 </style>
 </head>
 
@@ -289,20 +341,16 @@ footer {
                     <a href="/my-reservations.html">내 예약</a>
                 </li>
                 
-                <li class="admin-menu" style="display:none;">
-                    <a href="/admin-reservations.html">예약 관리</a>
-                </li>
+                <li class="admin-menu admin-dropdown" style="display:none;">
+                    <a href="#" class="admin-dropdown-toggle">관리자 메뉴 ▾</a>
 
-                <li class="admin-menu" style="display:none;">
-                    <a href="/admin-menu-settings.html">메뉴 관리</a>
-                </li>
-
-                <li class="admin-menu" style="display:none;">
-                    <a href="/admin-gallery.html">갤러리 관리</a>
-                </li>
-
-                <li class="admin-menu" style="display:none;">
-                    <a href="/admin-blocked-times.html">영업 시간 관리</a>
+                    <ul class="admin-dropdown-menu">
+                        <li><a href="/admin-reservations.html">예약 관리</a></li>
+                        <li><a href="/admin-menu-settings.html">메뉴 관리</a></li>
+                        <li><a href="/admin-gallery.html">갤러리 관리</a></li>
+                        <li><a href="/admin-blocked-times.html">영업 시간 관리</a></li>
+                        <li><a href="/admin-settings.html">운영 설정</a></li>
+                    </ul>
                 </li>
             </ul>
         </nav>
@@ -372,11 +420,10 @@ footer {
                 </div>
 
                 <div class="notice-box">
-                    <strong>예약 안내</strong><br>
-                    - 예약금 결제 완료 후 예약 요청이 접수됩니다.<br>
-                    - 예약 요청 후 상담을 통해 최종 예약이 확정됩니다.<br>
-                    - 시술 내용 및 디자인에 따라 소요 시간과 금액이 달라질 수 있습니다.<br>
-                    - 일정 변경이나 취소는 가능한 한 미리 연락 부탁드립니다.
+                    <strong>예약 안내</strong>
+                    <div id="reservationNoticeContent" class="notice-content">
+                        예약 안내를 불러오는 중입니다...
+                    </div>
                 </div>
 
                 <div class="btn-wrap">
@@ -443,6 +490,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     document.getElementById("phone").value = user.phone || "";
 
     await loadMenus();
+    await loadReservationNotice();
     await initReservationDatePicker();
 
     resetTimeSelect("메뉴와 날짜를 먼저 선택해주세요");
@@ -484,6 +532,25 @@ async function loadMenus() {
     } catch (error) {
         console.error(error);
         alert("시술 메뉴를 불러오지 못했습니다.");
+    }
+}
+
+async function loadReservationNotice() {
+    const noticeContent = document.getElementById("reservationNoticeContent");
+
+    try {
+        const response = await fetch("/api/reservation-notice");
+
+        if (!response.ok) {
+            throw new Error("예약 안내 문구 조회 실패");
+        }
+
+        const notice = await response.json();
+
+        noticeContent.textContent = notice.content || "등록된 예약 안내 문구가 없습니다.";
+    } catch (error) {
+        console.error(error);
+        noticeContent.textContent = "예약 안내 문구를 불러오지 못했습니다.";
     }
 }
 

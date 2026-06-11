@@ -325,6 +325,53 @@ footer {
 .auth-btn:hover {
     background: #f3f1ee;
 }
+
+.admin-dropdown {
+    position: relative;
+}
+
+.admin-dropdown-toggle {
+    cursor: pointer;
+}
+
+.admin-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 160px;
+    padding: 10px 0;
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    list-style: none;
+    z-index: 100;
+}
+
+.admin-dropdown:hover .admin-dropdown-menu {
+    display: block;
+}
+
+.admin-dropdown-menu li {
+    width: 100%;
+}
+
+.admin-dropdown-menu a {
+    display: block;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+}
+
+.admin-dropdown-menu a:hover,
+.admin-dropdown-menu a.active {
+    background: #f8f6f3;
+    color: #a38b7b;
+    font-weight: 600;
+}
 </style>
 </head>
 
@@ -344,20 +391,16 @@ footer {
                     <a href="/my-reservations.html">내 예약</a>
                 </li>
 
-                <li class="admin-menu" style="display:none;">
-                    <a href="/admin-reservations.html">예약 관리</a>
-                </li>
+                <li class="admin-menu admin-dropdown" style="display:none;">
+                    <a href="#" class="admin-dropdown-toggle">관리자 메뉴 ▾</a>
 
-                <li class="admin-menu" style="display:none;">
-                    <a href="/admin-menu-settings.html">메뉴 관리</a>
-                </li>
-
-                <li class="admin-menu" style="display:none;">
-                    <a href="/admin-gallery.html">갤러리 관리</a>
-                </li>
-
-                <li class="admin-menu" style="display:none;">
-                    <a href="/admin-blocked-times.html">영업 시간 관리</a>
+                    <ul class="admin-dropdown-menu">
+                        <li><a href="/admin-reservations.html">예약 관리</a></li>
+                        <li><a href="/admin-menu-settings.html">메뉴 관리</a></li>
+                        <li><a href="/admin-gallery.html">갤러리 관리</a></li>
+                        <li><a href="/admin-blocked-times.html">영업 시간 관리</a></li>
+                        <li><a href="/admin-settings.html">운영 설정</a></li>
+                    </ul>
                 </li>
             </ul>
         </nav>
