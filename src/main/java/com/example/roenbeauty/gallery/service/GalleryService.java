@@ -47,6 +47,7 @@ public class GalleryService {
                 .toList();
     }
 
+    @Transactional
     public GalleryResponseDto updateGallery(Long id, GalleryUpdateRequestDto requestDto) {
         Gallery gallery = galleryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 갤러리입니다."));

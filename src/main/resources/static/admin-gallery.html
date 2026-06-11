@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>메뉴 관리 | Roen Beauty</title>
+<title>갤러리 관리 | Roen Beauty</title>
 
 <style>
 * {
@@ -121,9 +121,13 @@ nav a.active {
 
 .create-grid {
     display: grid;
-    grid-template-columns: 1fr 1.4fr 1fr 1fr 1fr 1fr 120px;
+    grid-template-columns: 1fr 1.5fr 2fr 1fr 1fr 120px;
     gap: 12px;
     align-items: center;
+}
+
+.create-grid textarea {
+    grid-column: 1 / -1;
 }
 
 .filter-panel {
@@ -161,7 +165,7 @@ nav a.active {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 1000px;
+    min-width: 1200px;
 }
 
 thead {
@@ -187,9 +191,9 @@ td {
 }
 
 input,
-select {
+select,
+textarea {
     width: 100%;
-    height: 42px;
     padding: 0 12px;
     border: 1px solid #ddd5ce;
     border-radius: 12px;
@@ -199,27 +203,55 @@ select {
     outline: none;
 }
 
+input,
+select {
+    height: 42px;
+}
+
+textarea {
+    min-height: 80px;
+    padding: 12px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
     border-color: #a38b7b;
     box-shadow: 0 0 0 3px rgba(163, 139, 123, 0.12);
 }
 
+.preview-img {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid #eee;
+    background: #f8f6f3;
+}
+
 .category-select {
-    min-width: 120px;
+    min-width: 110px;
 }
 
 .visible-select {
     min-width: 90px;
 }
 
-.save-btn {
+.action-wrap {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.save-btn,
+.delete-btn {
     height: 42px;
-    min-width: 80px;
-    padding: 0 20px;
+    min-width: 70px;
+    padding: 0 16px;
     border-radius: 30px;
     border: none;
-    background: #a38b7b;
     color: white;
     font-size: 14px;
     font-weight: 700;
@@ -230,9 +262,20 @@ select:focus {
     justify-content: center;
 }
 
+.save-btn {
+    background: #a38b7b;
+}
+
 .save-btn:hover {
     background: #8f7868;
-    transform: translateY(-1px);
+}
+
+.delete-btn {
+    background: #b85c5c;
+}
+
+.delete-btn:hover {
+    background: #9f4848;
 }
 
 .loading-message,
@@ -338,11 +381,11 @@ footer {
                 </li>
 
                 <li class="admin-menu" style="display:none;">
-                    <a href="/admin-menu-settings.html" class="active">메뉴 관리</a>
+                    <a href="/admin-menu-settings.html">메뉴 관리</a>
                 </li>
 
                 <li class="admin-menu" style="display:none;">
-                    <a href="/admin-gallery.html">갤러리 관리</a>
+                    <a href="/admin-gallery.html" class="active">갤러리 관리</a>
                 </li>
 
                 <li class="admin-menu" style="display:none;">
@@ -361,8 +404,8 @@ footer {
 
 <div class="page-hero">
     <div class="container">
-        <h1>메뉴 관리</h1>
-        <p>시술 메뉴의 카테고리, 가격, 소요시간, 노출 여부, 정렬 순서를 관리할 수 있습니다.</p>
+        <h1>갤러리 관리</h1>
+        <p>갤러리 사진의 이미지 URL, 제목, 설명, 카테고리, 노출 여부, 정렬 순서를 관리할 수 있습니다.</p>
     </div>
 </div>
 
@@ -370,27 +413,26 @@ footer {
     <div class="container">
 
         <div class="create-card">
-            <h3>메뉴 추가</h3>
+            <h3>갤러리 추가</h3>
 
             <div class="create-grid">
                 <select id="newCategory">
                     <option value="NAIL">네일</option>
-                    <option value="OPTION">옵션</option>
                     <option value="PEDI">패디</option>
                     <option value="EYELASH">속눈썹</option>
-                    <option value="REMOVE">제거</option>
-                    <option value="MEMBERSHIP">멤버십</option>
+                    <option value="ETC">기타</option>
                 </select>
 
-                <input type="text" id="newName" placeholder="메뉴명">
-                <input type="number" id="newPrice" placeholder="가격">
-                <input type="number" id="newDuration" placeholder="소요시간">
+                <input type="text" id="newTitle" placeholder="제목">
+                <input type="text" id="newImageUrl" placeholder="이미지 URL">
                 <select id="newVisible">
                     <option value="true">노출</option>
                     <option value="false">숨김</option>
                 </select>
                 <input type="number" id="newSortOrder" placeholder="정렬순서">
-                <button type="button" class="save-btn" onclick="createMenu()">메뉴 추가</button>
+                <button type="button" class="save-btn" onclick="createGallery()">추가</button>
+
+                <textarea id="newDescription" placeholder="설명"></textarea>
             </div>
         </div>
 
@@ -399,40 +441,39 @@ footer {
             <select id="categoryFilter">
                 <option value="ALL">전체</option>
                 <option value="NAIL">네일</option>
-                <option value="OPTION">옵션</option>
                 <option value="PEDI">패디</option>
                 <option value="EYELASH">속눈썹</option>
-                <option value="REMOVE">제거</option>
-                <option value="MEMBERSHIP">멤버십</option>
+                <option value="ETC">기타</option>
             </select>
         </div>
 
-        <div id="loadingMessage" class="loading-message">메뉴 목록을 불러오는 중입니다...</div>
-        <div id="errorMessage" class="error-message" style="display:none;">메뉴 목록을 불러오지 못했습니다.</div>
-        <div id="emptyMessage" class="empty-message" style="display:none;">등록된 메뉴가 없습니다.</div>
+        <div id="loadingMessage" class="loading-message">갤러리 목록을 불러오는 중입니다...</div>
+        <div id="errorMessage" class="error-message" style="display:none;">갤러리 목록을 불러오지 못했습니다.</div>
+        <div id="emptyMessage" class="empty-message" style="display:none;">등록된 갤러리가 없습니다.</div>
 
         <div id="tableCard" class="table-card" style="display:none;">
             <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
+                            <th>이미지</th>
                             <th>카테고리</th>
-                            <th>메뉴명</th>
-                            <th>가격</th>
-                            <th>소요시간</th>
+                            <th>제목</th>
+                            <th>이미지 URL</th>
+                            <th>설명</th>
                             <th>노출</th>
                             <th>정렬순서</th>
-                            <th style="width:120px;">저장</th>
+                            <th style="width:150px;">관리</th>
                         </tr>
                     </thead>
 
-                    <tbody id="menuTableBody"></tbody>
+                    <tbody id="galleryTableBody"></tbody>
                 </table>
             </div>
         </div>
 
         <div class="btn-wrap">
-            <a href="/services.html" class="btn btn-main">시술 메뉴로</a>
+            <a href="/gallery.html" class="btn btn-main">갤러리로</a>
             <a href="/index.html" class="btn btn-sub">메인으로 돌아가기</a>
         </div>
 
@@ -444,7 +485,7 @@ footer {
 </footer>
 
 <script>
-let allMenus = [];
+let allGalleries = [];
 
 document.addEventListener("DOMContentLoaded", function () {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -476,18 +517,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("categoryFilter").addEventListener("change", function () {
-        renderMenusByFilter();
+        renderGalleriesByFilter();
     });
 
-    loadMenus();
+    loadGalleries();
 });
 
-async function loadMenus() {
+async function loadGalleries() {
     const loadingMessage = document.getElementById("loadingMessage");
     const errorMessage = document.getElementById("errorMessage");
     const emptyMessage = document.getElementById("emptyMessage");
     const tableCard = document.getElementById("tableCard");
-    const tbody = document.getElementById("menuTableBody");
+    const tbody = document.getElementById("galleryTableBody");
 
     loadingMessage.style.display = "block";
     errorMessage.style.display = "none";
@@ -496,17 +537,17 @@ async function loadMenus() {
     tbody.innerHTML = "";
 
     try {
-        const response = await fetch("/api/menus/admin");
+        const response = await fetch("/api/galleries/admin");
 
         if (!response.ok) {
-            throw new Error("메뉴 조회 실패");
+            throw new Error("갤러리 조회 실패");
         }
 
-        allMenus = await response.json();
+        allGalleries = await response.json();
 
         loadingMessage.style.display = "none";
 
-        renderMenusByFilter();
+        renderGalleriesByFilter();
     } catch (error) {
         console.error(error);
         loadingMessage.style.display = "none";
@@ -515,80 +556,92 @@ async function loadMenus() {
     }
 }
 
-function renderMenusByFilter() {
+function renderGalleriesByFilter() {
     const selectedCategory = document.getElementById("categoryFilter").value;
 
-    const filteredMenus = selectedCategory === "ALL"
-        ? allMenus
-        : allMenus.filter(menu => menu.category === selectedCategory);
+    const filteredGalleries = selectedCategory === "ALL"
+        ? allGalleries
+        : allGalleries.filter(gallery => gallery.category === selectedCategory);
 
-    renderMenus(filteredMenus);
+    renderGalleries(filteredGalleries);
 }
 
-function renderMenus(menus) {
+function renderGalleries(galleries) {
     const emptyMessage = document.getElementById("emptyMessage");
     const tableCard = document.getElementById("tableCard");
-    const tbody = document.getElementById("menuTableBody");
+    const tbody = document.getElementById("galleryTableBody");
 
     tbody.innerHTML = "";
     emptyMessage.style.display = "none";
     tableCard.style.display = "none";
 
-    if (!menus || menus.length === 0) {
+    if (!galleries || galleries.length === 0) {
         emptyMessage.style.display = "block";
         return;
     }
 
-    menus.forEach(menu => {
+    galleries.forEach(gallery => {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
             <td>
-                <select id="category-${menu.id}" class="category-select">
-                    ${renderCategoryOptions(menu.category)}
+                <img
+                    class="preview-img"
+                    src="${escapeHtml(gallery.imageUrl)}"
+                    alt="${escapeHtml(gallery.title)}"
+                    onerror="this.style.display='none';">
+            </td>
+
+            <td>
+                <select id="category-${gallery.id}" class="category-select">
+                    ${renderCategoryOptions(gallery.category)}
                 </select>
             </td>
 
             <td>
                 <input
-                    id="name-${menu.id}"
-                    value="${escapeHtml(menu.name)}">
+                    id="title-${gallery.id}"
+                    value="${escapeHtml(gallery.title)}">
             </td>
 
             <td>
                 <input
-                    type="number"
-                    id="price-${menu.id}"
-                    value="${menu.priceValue}">
+                    id="imageUrl-${gallery.id}"
+                    value="${escapeHtml(gallery.imageUrl)}">
             </td>
 
             <td>
-                <input
-                    type="number"
-                    id="duration-${menu.id}"
-                    value="${menu.durationMinutes}">
+                <textarea id="description-${gallery.id}">${escapeHtml(gallery.description || "")}</textarea>
             </td>
 
             <td>
-                <select id="visible-${menu.id}" class="visible-select">
-                    <option value="true" ${menu.visible ? "selected" : ""}>노출</option>
-                    <option value="false" ${!menu.visible ? "selected" : ""}>숨김</option>
+                <select id="visible-${gallery.id}" class="visible-select">
+                    <option value="true" ${gallery.visible ? "selected" : ""}>노출</option>
+                    <option value="false" ${!gallery.visible ? "selected" : ""}>숨김</option>
                 </select>
             </td>
 
             <td>
                 <input
                     type="number"
-                    id="sort-${menu.id}"
-                    value="${menu.sortOrder}">
+                    id="sort-${gallery.id}"
+                    value="${gallery.sortOrder}">
             </td>
 
             <td>
-                <button
-                    class="save-btn"
-                    onclick="updateMenu(${menu.id})">
-                    저장
-                </button>
+                <div class="action-wrap">
+                    <button
+                        class="save-btn"
+                        onclick="updateGallery(${gallery.id})">
+                        저장
+                    </button>
+
+                    <button
+                        class="delete-btn"
+                        onclick="deleteGallery(${gallery.id})">
+                        삭제
+                    </button>
+                </div>
             </td>
         `;
 
@@ -601,11 +654,9 @@ function renderMenus(menus) {
 function renderCategoryOptions(selectedCategory) {
     const categories = [
         { value: "NAIL", text: "네일" },
-        { value: "OPTION", text: "옵션" },
         { value: "PEDI", text: "패디" },
         { value: "EYELASH", text: "속눈썹" },
-        { value: "REMOVE", text: "제거" },
-        { value: "MEMBERSHIP", text: "멤버십" }
+        { value: "ETC", text: "기타" }
     ];
 
     return categories.map(category => {
@@ -614,43 +665,36 @@ function renderCategoryOptions(selectedCategory) {
     }).join("");
 }
 
-async function createMenu() {
+async function createGallery() {
     const category = document.getElementById("newCategory").value;
-    const name = document.getElementById("newName").value.trim();
-    const priceValue = Number(document.getElementById("newPrice").value);
-    const durationMinutes = Number(document.getElementById("newDuration").value);
+    const title = document.getElementById("newTitle").value.trim();
+    const imageUrl = document.getElementById("newImageUrl").value.trim();
+    const description = document.getElementById("newDescription").value.trim();
     const visible = document.getElementById("newVisible").value === "true";
     const sortOrderInput = document.getElementById("newSortOrder").value;
     const sortOrder = sortOrderInput === "" ? getNextSortOrder(category) : Number(sortOrderInput);
 
-    if (!name) {
-        alert("메뉴명을 입력해주세요.");
+    if (!title) {
+        alert("제목을 입력해주세요.");
         return;
     }
 
-    if (priceValue < 0) {
-        alert("가격은 0원 이상이어야 합니다.");
-        return;
-    }
-
-    if (durationMinutes < 0) {
-        alert("소요시간은 0분 이상이어야 합니다.");
+    if (!imageUrl) {
+        alert("이미지 URL을 입력해주세요.");
         return;
     }
 
     const requestBody = {
-        name: name,
-        priceValue: priceValue,
-        durationMinutes: durationMinutes,
-        visible: visible,
-        sortOrder: sortOrder,
+        imageUrl: imageUrl,
+        title: title,
+        description: description,
         category: category,
-        description: "",
-        priceText: ""
+        visible: visible,
+        sortOrder: sortOrder
     };
 
     try {
-        const response = await fetch("/api/menus", {
+        const response = await fetch("/api/galleries", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -660,60 +704,53 @@ async function createMenu() {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || "메뉴 등록 실패");
+            throw new Error(errorText || "갤러리 등록 실패");
         }
 
-        alert("메뉴가 등록되었습니다.");
+        alert("갤러리가 등록되었습니다.");
 
-        document.getElementById("newName").value = "";
-        document.getElementById("newPrice").value = "";
-        document.getElementById("newDuration").value = "";
+        document.getElementById("newTitle").value = "";
+        document.getElementById("newImageUrl").value = "";
+        document.getElementById("newDescription").value = "";
         document.getElementById("newSortOrder").value = "";
         document.getElementById("newVisible").value = "true";
 
-        await loadMenus();
+        await loadGalleries();
     } catch (error) {
         console.error(error);
-        alert(error.message || "메뉴 등록 중 오류가 발생했습니다.");
+        alert(error.message || "갤러리 등록 중 오류가 발생했습니다.");
     }
 }
 
-async function updateMenu(menuId) {
-    const name = document.getElementById(`name-${menuId}`).value.trim();
-    const priceValue = Number(document.getElementById(`price-${menuId}`).value);
-    const durationMinutes = Number(document.getElementById(`duration-${menuId}`).value);
-    const visible = document.getElementById(`visible-${menuId}`).value === "true";
-    const sortOrder = Number(document.getElementById(`sort-${menuId}`).value);
-    const category = document.getElementById(`category-${menuId}`).value;
+async function updateGallery(galleryId) {
+    const category = document.getElementById(`category-${galleryId}`).value;
+    const title = document.getElementById(`title-${galleryId}`).value.trim();
+    const imageUrl = document.getElementById(`imageUrl-${galleryId}`).value.trim();
+    const description = document.getElementById(`description-${galleryId}`).value.trim();
+    const visible = document.getElementById(`visible-${galleryId}`).value === "true";
+    const sortOrder = Number(document.getElementById(`sort-${galleryId}`).value);
 
-    if (!name) {
-        alert("메뉴명을 입력해주세요.");
+    if (!title) {
+        alert("제목을 입력해주세요.");
         return;
     }
 
-    if (priceValue < 0) {
-        alert("가격은 0원 이상이어야 합니다.");
-        return;
-    }
-
-    if (durationMinutes < 0) {
-        alert("소요시간은 0분 이상이어야 합니다.");
+    if (!imageUrl) {
+        alert("이미지 URL을 입력해주세요.");
         return;
     }
 
     const requestBody = {
-        name: name,
-        priceValue: priceValue,
-        durationMinutes: durationMinutes,
-        visible: visible,
-        sortOrder: sortOrder,
+        imageUrl: imageUrl,
+        title: title,
+        description: description,
         category: category,
-        description: "",
-        priceText: ""
+        visible: visible,
+        sortOrder: sortOrder
     };
 
     try {
-        const response = await fetch(`/api/menus/${menuId}`, {
+        const response = await fetch(`/api/galleries/${galleryId}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -723,25 +760,50 @@ async function updateMenu(menuId) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || "메뉴 저장 실패");
+            throw new Error(errorText || "갤러리 저장 실패");
         }
 
-        alert("메뉴가 저장되었습니다.");
-        await loadMenus();
+        alert("갤러리가 저장되었습니다.");
+        await loadGalleries();
     } catch (error) {
         console.error(error);
-        alert(error.message || "메뉴 저장 중 오류가 발생했습니다.");
+        alert(error.message || "갤러리 저장 중 오류가 발생했습니다.");
+    }
+}
+
+async function deleteGallery(galleryId) {
+    const confirmed = confirm("정말 이 갤러리를 삭제하시겠습니까?");
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/galleries/${galleryId}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "갤러리 삭제 실패");
+        }
+
+        alert("갤러리가 삭제되었습니다.");
+        await loadGalleries();
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "갤러리 삭제 중 오류가 발생했습니다.");
     }
 }
 
 function getNextSortOrder(category) {
-    const sameCategoryMenus = allMenus.filter(menu => menu.category === category);
+    const sameCategoryGalleries = allGalleries.filter(gallery => gallery.category === category);
 
-    if (!sameCategoryMenus || sameCategoryMenus.length === 0) {
+    if (!sameCategoryGalleries || sameCategoryGalleries.length === 0) {
         return 1;
     }
 
-    return Math.max(...sameCategoryMenus.map(menu => menu.sortOrder || 0)) + 1;
+    return Math.max(...sameCategoryGalleries.map(gallery => gallery.sortOrder || 0)) + 1;
 }
 
 function escapeHtml(value) {

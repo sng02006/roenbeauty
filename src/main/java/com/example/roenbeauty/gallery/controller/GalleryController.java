@@ -35,7 +35,7 @@ public class GalleryController {
 
     @PutMapping("/{id}")
     public GalleryResponseDto updateGallery(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody GalleryUpdateRequestDto requestDto
     ) {
         return galleryService.updateGallery(id, requestDto);
@@ -47,7 +47,7 @@ public class GalleryController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteGallery(@PathVariable Long id) {
+    public void deleteGallery(@PathVariable("id") Long id) {
         galleryService.deleteGallery(id);
     }
 }
