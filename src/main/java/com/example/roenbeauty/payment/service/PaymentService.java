@@ -157,7 +157,7 @@ public class PaymentService {
                 reservation.getId(),
                 payment.getId(),
                 payment.getOrderId(),
-                "Roen Beauty 예약금",
+                "Ro:en Beauty 예약금",
                 payment.getAmount(),
                 reservation.getName(),
                 reservation.getUser().getEmail()
