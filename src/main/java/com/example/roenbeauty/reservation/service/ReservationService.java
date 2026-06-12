@@ -86,7 +86,7 @@ public class ReservationService {
         Reservation savedReservation = reservationRepository.save(reservation);
 
         String orderId = "reservation-" + savedReservation.getId();
-        String orderName = "Roen Beauty 예약금";
+        String orderName = "Ro:en Beauty 예약금";
         int paymentAmount = calculateDepositAmount(savedReservation.getReservationTime());
 
         Payment payment = new Payment(
