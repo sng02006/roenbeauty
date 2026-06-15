@@ -107,8 +107,14 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         const result = await res.json();
 
         // 유저 정보 저장
-        localStorage.setItem("user", JSON.stringify(result));
-
+        localStorage.setItem("accessToken", result.accessToken);
+        localStorage.setItem("user", JSON.stringify({
+            userId: result.userId,
+            email: result.email,
+            name: result.name,
+            phone: result.phone,
+            role: result.role
+        }));
         alert("로그인 성공!");
         location.href = "/index.html";
 
