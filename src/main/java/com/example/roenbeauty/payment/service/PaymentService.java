@@ -1,5 +1,6 @@
 package com.example.roenbeauty.payment.service;
 
+import com.example.roenbeauty.global.dto.AuthUser;
 import com.example.roenbeauty.payment.client.TossPaymentClient;
 import com.example.roenbeauty.payment.dto.CheckoutResponseDto;
 import com.example.roenbeauty.payment.dto.PaymentCancelRequestDto;
@@ -12,6 +13,7 @@ import com.example.roenbeauty.payment.repository.PaymentRepository;
 import com.example.roenbeauty.reservation.entity.Reservation;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import com.example.roenbeauty.reservation.repository.ReservationRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +35,15 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentResponseDto confirmPayment(Long reservationId, PaymentConfirmRequestDto requestDto) {
+    public PaymentResponseDto confirmPayment(
+            AuthUser authUser,
+            Long reservationId,
+            PaymentConfirmRequestDto requestDto
+    ) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약이 존재하지 않습니다."));
+
+        validateReservationOwner(authUser, reservation);
 
         if (reservation.getStatus() != ReservationStatus.WAITING_PAYMENT) {
             throw new IllegalArgumentException("결제 대기 상태의 예약만 결제할 수 있습니다.");
@@ -75,9 +83,11 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public PaymentResponseDto getPayment(Long reservationId) {
+    public PaymentResponseDto getPayment(AuthUser authUser, Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약이 존재하지 않습니다."));
+
+        validateReservationOwner(authUser, reservation);
 
         Payment payment = paymentRepository.findByReservation(reservation)
                 .orElseThrow(() -> new IllegalArgumentException("결제 정보가 존재하지 않습니다."));
@@ -86,9 +96,15 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentResponseDto cancelPayment(Long reservationId, PaymentCancelRequestDto requestDto) {
+    public PaymentResponseDto cancelPayment(
+            AuthUser authUser,
+            Long reservationId,
+            PaymentCancelRequestDto requestDto
+    ) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약이 존재하지 않습니다."));
+
+        validateReservationOwner(authUser, reservation);
 
         if (reservation.getStatus() == ReservationStatus.CANCELED) {
             throw new IllegalArgumentException("이미 취소된 예약입니다.");
@@ -137,10 +153,11 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public CheckoutResponseDto getCheckoutInfo(Long reservationId) {
-
+    public CheckoutResponseDto getCheckoutInfo(AuthUser authUser, Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약이 존재하지 않습니다."));
+
+        validateReservationOwner(authUser, reservation);
 
         if (reservation.getStatus() != ReservationStatus.WAITING_PAYMENT) {
             throw new IllegalArgumentException("결제 대기 상태의 예약만 결제를 이어서 진행할 수 있습니다.");
@@ -162,5 +179,18 @@ public class PaymentService {
                 reservation.getName(),
                 reservation.getUser().getEmail()
         );
+    }
+
+    private void validateReservationOwner(AuthUser authUser, Reservation reservation) {
+        boolean isReservationOwner =
+                reservation.getUser().getId().equals(authUser.getUserId());
+
+        boolean isAdmin =
+                authUser.getRole().name().equals("ADMIN")
+                        || authUser.getRole().name().equals("OWNER");
+
+        if (!isReservationOwner && !isAdmin) {
+            throw new AccessDeniedException("본인의 예약만 결제 처리할 수 있습니다.");
+        }
     }
 }
