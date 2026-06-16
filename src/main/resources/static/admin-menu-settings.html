@@ -385,7 +385,7 @@ footer {
 
                     <ul class="admin-dropdown-menu">
                         <li><a href="/admin-reservations.html">예약 관리</a></li>
-                        <li><a href="/admin-menu-settings.html">메뉴 관리</a></li>
+                        <li><a href="/admin-menu-settings.html" class="active">메뉴 관리</a></li>
                         <li><a href="/admin-gallery.html">갤러리 관리</a></li>
                         <li><a href="/admin-blocked-times.html">영업 시간 관리</a></li>
                         <li><a href="/admin-settings.html">운영 설정</a></li>
@@ -489,10 +489,46 @@ footer {
 <script>
 let allMenus = [];
 
+function authHeaders() {
+    const token = localStorage.getItem("accessToken");
+
+    return {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+    };
+}
+
+function authGetHeaders() {
+    const token = localStorage.getItem("accessToken");
+
+    return {
+        "Authorization": "Bearer " + token
+    };
+}
+
+function handleAuthError(response) {
+    if (response.status === 401) {
+        alert("로그인이 필요합니다.");
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        location.href = "/login.html";
+        return true;
+    }
+
+    if (response.status === 403) {
+        alert("관리자 권한이 필요합니다.");
+        location.href = "/index.html";
+        return true;
+    }
+
+    return false;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("accessToken");
 
-    if (!user || (user.role !== "ADMIN" && user.role !== "OWNER")) {
+    if (!user || !token || (user.role !== "ADMIN" && user.role !== "OWNER")) {
         alert("관리자만 접근할 수 있습니다.");
         location.href = "/index.html";
         return;
@@ -515,6 +551,7 @@ document.addEventListener("DOMContentLoaded", function () {
     logoutBtn.addEventListener("click", function (e) {
         e.preventDefault();
         localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
         location.href = "/index.html";
     });
 
@@ -539,7 +576,13 @@ async function loadMenus() {
     tbody.innerHTML = "";
 
     try {
-        const response = await fetch("/api/menus/admin");
+        const response = await fetch("/api/menus/admin", {
+            headers: authGetHeaders()
+        });
+
+        if (handleAuthError(response)) {
+            return;
+        }
 
         if (!response.ok) {
             throw new Error("메뉴 조회 실패");
@@ -695,11 +738,13 @@ async function createMenu() {
     try {
         const response = await fetch("/api/menus", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: authHeaders(),
             body: JSON.stringify(requestBody)
         });
+
+        if (handleAuthError(response)) {
+            return;
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -758,11 +803,13 @@ async function updateMenu(menuId) {
     try {
         const response = await fetch(`/api/menus/${menuId}`, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: authHeaders(),
             body: JSON.stringify(requestBody)
         });
+
+        if (handleAuthError(response)) {
+            return;
+        }
 
         if (!response.ok) {
             const errorText = await response.text();

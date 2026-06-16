@@ -423,18 +423,25 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     logoutBtn.addEventListener("click", function (e) {
         e.preventDefault();
+
         localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        
         location.href = "/index.html";
     });
 
-    await loadMyReservations(user.userId);
+    await loadMyReservations();
 });
 
-async function loadMyReservations(userId) {
+async function loadMyReservations() {
     const list = document.getElementById("reservationList");
 
     try {
-        const res = await fetch(`/api/reservations/my?userId=${userId}`);
+        const res = await fetch("/api/reservations/my", {
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("accessToken")
+            }
+        });
 
         if (!res.ok) {
             const errorText = await res.text();
@@ -528,9 +535,14 @@ function renderActionButton(reservation) {
 async function continuePayment(reservationId) {
 
     try {
-
         const response = await fetch(
-            `/api/reservations/${reservationId}/payments/checkout`
+            `/api/reservations/${reservationId}/payments/checkout`,
+            {
+                headers: {
+                    "Authorization":
+                        "Bearer " + localStorage.getItem("accessToken")
+                }
+            }
         );
 
         if (!response.ok) {
@@ -591,7 +603,9 @@ async function cancelReservation(id) {
         const response = await fetch(`/api/reservations/${id}/payments/cancel`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization":
+                    "Bearer " + localStorage.getItem("accessToken")
             },
             body: JSON.stringify({
                 cancelReason: reason,

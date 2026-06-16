@@ -1,5 +1,6 @@
 package com.example.roenbeauty.reservation.controller;
 
+import com.example.roenbeauty.global.dto.AuthUser;
 import com.example.roenbeauty.payment.dto.CheckoutResponseDto;
 import com.example.roenbeauty.reservation.dto.ReservationCreateRequestDto;
 import com.example.roenbeauty.reservation.dto.ReservationResponseDto;
@@ -7,6 +8,7 @@ import com.example.roenbeauty.reservation.dto.ReservationUpdateStatusRequestDto;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import com.example.roenbeauty.reservation.service.ReservationService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,8 +25,11 @@ public class ReservationController {
     }
 
     @PostMapping
-    public CheckoutResponseDto createReservation(@RequestBody ReservationCreateRequestDto requestDto) {
-        return reservationService.createReservation(requestDto);
+    public CheckoutResponseDto createReservation(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestBody ReservationCreateRequestDto requestDto
+    ) {
+        return reservationService.createReservation(authUser, requestDto);
     }
 
     @GetMapping
@@ -66,7 +71,9 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    public List<ReservationResponseDto> getMyReservations(@RequestParam("userId") Long userId) {
-        return reservationService.getMyReservations(userId);
+    public List<ReservationResponseDto> getMyReservations(
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        return reservationService.getMyReservations(authUser);
     }
 }

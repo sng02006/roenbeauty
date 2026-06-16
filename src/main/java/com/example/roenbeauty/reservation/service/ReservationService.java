@@ -4,6 +4,7 @@ import com.example.roenbeauty.blockedtime.entity.BlockedTime;
 import com.example.roenbeauty.blockedtime.repository.BlockedTimeRepository;
 import com.example.roenbeauty.businesshour.dto.BusinessHourResponseDto;
 import com.example.roenbeauty.businesshour.service.BusinessHourService;
+import com.example.roenbeauty.global.dto.AuthUser;
 import com.example.roenbeauty.menu.entity.Menu;
 import com.example.roenbeauty.menu.repository.MenuRepository;
 import com.example.roenbeauty.payment.dto.CheckoutResponseDto;
@@ -55,12 +56,15 @@ public class ReservationService {
         this.paymentRepository = paymentRepository;
     }
 
-    @Transactional
-    public CheckoutResponseDto createReservation(ReservationCreateRequestDto requestDto) {
+        @Transactional
+        public CheckoutResponseDto createReservation(
+                AuthUser authUser,
+                ReservationCreateRequestDto requestDto
+        ) {
         Menu menu = menuRepository.findById(requestDto.getMenuId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
 
-        User user = userRepository.findById(requestDto.getUserId())
+        User user = userRepository.findById(authUser.getUserId())
                 .orElseThrow(() -> new RuntimeException("유저 없음"));
 
         validateReservationDate(requestDto.getReservationDate());
@@ -210,9 +214,11 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponseDto> getMyReservations(Long userId) {
+    public List<ReservationResponseDto> getMyReservations(AuthUser authUser) {
         List<Reservation> reservations =
-                reservationRepository.findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(userId);
+                reservationRepository.findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(
+                        authUser.getUserId()
+                );
 
         return reservations.stream()
                 .map(ReservationResponseDto::from)

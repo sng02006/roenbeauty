@@ -83,6 +83,12 @@ p {
     const amount = params.get("amount");
     const reservationId = params.get("reservationId");
 
+    if (!localStorage.getItem("accessToken")) {
+        alert("로그인이 필요합니다.");
+        location.href = "/login.html";
+        return;
+    }
+
     try {
 
         const response = await fetch(
@@ -90,7 +96,8 @@ p {
             {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("accessToken")
                 },
                 body: JSON.stringify({
                     paymentKey,
