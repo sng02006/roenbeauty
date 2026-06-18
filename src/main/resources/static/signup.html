@@ -115,6 +115,10 @@ document.getElementById("signupForm").addEventListener("submit", async function(
         phone: phone
     };
 
+    const submitBtn = document.querySelector(".auth-btn");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "가입 중...";
+
     try {
         const res = await fetch("/api/users/signup", {
             method: "POST",
@@ -134,6 +138,9 @@ document.getElementById("signupForm").addEventListener("submit", async function(
     } catch (error) {
         console.error(error);
         alert("서버 오류 발생");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "회원가입";
     }
 });
 </script>

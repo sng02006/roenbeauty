@@ -6,7 +6,15 @@ import com.example.roenbeauty.user.enums.UserRole;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(
+    name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_users_email",
+            columnNames = "email"
+        )
+    }
+)
 public class User extends BaseTimeEntity {
 
     @Id
