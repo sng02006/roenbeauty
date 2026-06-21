@@ -191,6 +191,18 @@ nav a.active {
     line-height: 1.5;
 }
 
+.item-name-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.item-sub-inline {
+    font-size: 13px;
+    color: #7a726b;
+}
+
 .membership-note {
     margin-top: 22px;
     text-align: right;
@@ -561,12 +573,12 @@ function renderMenus(groupedMenus) {
 
         let menuItemsHtml = items.map(item => {
             const descriptionHtml = item.description
-                ? `<div class="item-sub">${item.description}</div>`
+                ? `<span class="item-sub-inline">${item.description}</span>`
                 : "";
 
             return `
                 <div class="menu-item">
-                    <div>
+                    <div class="item-name-wrap">
                         <div class="item-name">${item.name}</div>
                         ${descriptionHtml}
                     </div>
