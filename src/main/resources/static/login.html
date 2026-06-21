@@ -63,6 +63,13 @@ body {
     color: #a68b6d;
     text-decoration: none;
 }
+
+.kakao-btn {
+    margin-top: 12px;
+    background: #FEE500;
+    color: #191919;
+    border: none;
+}
 </style>
 </head>
 
@@ -76,6 +83,9 @@ body {
         <input type="password" id="password" placeholder="비밀번호" required>
 
         <button type="submit" class="auth-btn">로그인</button>
+        <button type="button" class="auth-btn kakao-btn" onclick="startKakaoLogin()">
+            카카오로 로그인
+        </button>
     </form>
 
     <div class="auth-link">
@@ -123,6 +133,20 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         alert("서버 오류 발생");
     }
 });
+
+function startKakaoLogin() {
+    const clientId = "25cb803ebf43d02fe13762e1af22bec0";
+    const redirectUri = window.location.origin + "/kakao-callback.html";
+
+    const kakaoAuthUrl =
+        "https://kauth.kakao.com/oauth/authorize"
+        + "?response_type=code"
+        + "&client_id=" + clientId
+        + "&redirect_uri=" + encodeURIComponent(redirectUri)
+        + "&scope=profile_nickname";
+
+    location.href = kakaoAuthUrl;
+}
 </script>
 
 </body>

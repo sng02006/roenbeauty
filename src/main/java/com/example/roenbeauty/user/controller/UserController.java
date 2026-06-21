@@ -1,5 +1,6 @@
 package com.example.roenbeauty.user.controller;
 
+import com.example.roenbeauty.user.dto.KakaoLoginRequestDto;
 import com.example.roenbeauty.user.dto.LoginRequestDto;
 import com.example.roenbeauty.user.dto.LoginResponseDto;
 import com.example.roenbeauty.user.dto.SignupRequestDto;
@@ -24,5 +25,10 @@ public class UserController {
     @PostMapping("/login")
     public LoginResponseDto login(@RequestBody LoginRequestDto requestDto) {
         return userService.login(requestDto);
+    }
+
+    @PostMapping("/kakao/login")
+    public LoginResponseDto kakaoLogin(@RequestBody KakaoLoginRequestDto requestDto) {
+        return userService.kakaoLogin(requestDto);
     }
 }

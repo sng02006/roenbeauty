@@ -63,7 +63,8 @@ public class SecurityConfig {
                         // 회원가입, 로그인
                         .requestMatchers(
                                 "/api/users/signup",
-                                "/api/users/login"
+                                "/api/users/login",
+                                "/api/users/kakao/login"
                         ).permitAll()
 
                         // 공개 조회 API
