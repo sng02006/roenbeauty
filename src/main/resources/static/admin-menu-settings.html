@@ -121,7 +121,7 @@ nav a.active {
 
 .create-grid {
     display: grid;
-    grid-template-columns: 1fr 1.4fr 1fr 1fr 1fr 1fr 120px;
+    grid-template-columns: 1fr 1.4fr 1.6fr 1fr 1fr 1fr 1fr 120px;
     gap: 12px;
     align-items: center;
 }
@@ -161,7 +161,7 @@ nav a.active {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 1000px;
+    min-width: 1180px;
 }
 
 thead {
@@ -426,6 +426,7 @@ footer {
                 </select>
 
                 <input type="text" id="newName" placeholder="메뉴명">
+                <input type="text" id="newDescription" placeholder="설명">
                 <input type="number" id="newPrice" placeholder="가격">
                 <input type="number" id="newDuration" placeholder="소요시간">
                 <select id="newVisible">
@@ -461,6 +462,7 @@ footer {
                         <tr>
                             <th>카테고리</th>
                             <th>메뉴명</th>
+                            <th>설명</th>
                             <th>가격</th>
                             <th>소요시간</th>
                             <th>노출</th>
@@ -643,6 +645,12 @@ function renderMenus(menus) {
 
             <td>
                 <input
+                    id="description-${menu.id}"
+                    value="${escapeHtml(menu.description)}">
+            </td>
+
+            <td>
+                <input
                     type="number"
                     id="price-${menu.id}"
                     value="${menu.priceValue}">
@@ -703,6 +711,7 @@ function renderCategoryOptions(selectedCategory) {
 async function createMenu() {
     const category = document.getElementById("newCategory").value;
     const name = document.getElementById("newName").value.trim();
+    const description = document.getElementById("newDescription").value.trim();
     const priceValue = Number(document.getElementById("newPrice").value);
     const durationMinutes = Number(document.getElementById("newDuration").value);
     const visible = document.getElementById("newVisible").value === "true";
@@ -731,7 +740,7 @@ async function createMenu() {
         visible: visible,
         sortOrder: sortOrder,
         category: category,
-        description: "",
+        description: description,
         priceText: ""
     };
 
@@ -754,6 +763,7 @@ async function createMenu() {
         alert("메뉴가 등록되었습니다.");
 
         document.getElementById("newName").value = "";
+        document.getElementById("newDescription").value = "";
         document.getElementById("newPrice").value = "";
         document.getElementById("newDuration").value = "";
         document.getElementById("newSortOrder").value = "";
@@ -768,6 +778,7 @@ async function createMenu() {
 
 async function updateMenu(menuId) {
     const name = document.getElementById(`name-${menuId}`).value.trim();
+    const description = document.getElementById(`description-${menuId}`).value.trim();
     const priceValue = Number(document.getElementById(`price-${menuId}`).value);
     const durationMinutes = Number(document.getElementById(`duration-${menuId}`).value);
     const visible = document.getElementById(`visible-${menuId}`).value === "true";
@@ -796,7 +807,7 @@ async function updateMenu(menuId) {
         visible: visible,
         sortOrder: sortOrder,
         category: category,
-        description: "",
+        description: description,
         priceText: ""
     };
 
