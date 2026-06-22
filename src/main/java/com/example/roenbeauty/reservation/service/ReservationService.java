@@ -18,6 +18,10 @@ import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import com.example.roenbeauty.reservation.repository.ReservationRepository;
 import com.example.roenbeauty.user.entity.User;
 import com.example.roenbeauty.user.repository.UserRepository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,98 +60,85 @@ public class ReservationService {
         this.paymentRepository = paymentRepository;
     }
 
-        @Transactional
-        public CheckoutResponseDto createReservation(
-                AuthUser authUser,
-                ReservationCreateRequestDto requestDto
-        ) {
-        Menu menu = menuRepository.findById(requestDto.getMenuId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+    @Transactional
+    public CheckoutResponseDto createReservation(
+            AuthUser authUser,
+            ReservationCreateRequestDto requestDto
+    ) {
+    Menu menu = menuRepository.findById(requestDto.getMenuId())
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
 
-        User user = userRepository.findById(authUser.getUserId())
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+    User user = userRepository.findById(authUser.getUserId())
+            .orElseThrow(() -> new RuntimeException("유저 없음"));
 
-        validateReservationDate(requestDto.getReservationDate());
+    validateReservationDate(requestDto.getReservationDate());
 
-        validateReservationTime(
-                requestDto.getReservationDate(),
-                requestDto.getReservationTime(),
-                menu.getDurationMinutes()
-        );
+    validateReservationTime(
+            requestDto.getReservationDate(),
+            requestDto.getReservationTime(),
+            menu.getDurationMinutes()
+    );
 
-        Reservation reservation = new Reservation(
-                requestDto.getName(),
-                requestDto.getPhone(),
-                requestDto.getReservationDate(),
-                requestDto.getReservationTime(),
-                menu.getName(),
-                requestDto.getRequestMemo(),
-                ReservationStatus.WAITING_PAYMENT,
-                menu.getDurationMinutes(),
-                user
-        );
+    Reservation reservation = new Reservation(
+            requestDto.getName(),
+            requestDto.getPhone(),
+            requestDto.getReservationDate(),
+            requestDto.getReservationTime(),
+            menu.getName(),
+            requestDto.getRequestMemo(),
+            ReservationStatus.WAITING_PAYMENT,
+            menu.getDurationMinutes(),
+            user
+    );
 
-        Reservation savedReservation = reservationRepository.save(reservation);
+    Reservation savedReservation = reservationRepository.save(reservation);
 
-        String orderId = "reservation-" + savedReservation.getId();
-        String orderName = "Ro:en Beauty 예약금";
-        int paymentAmount = calculateDepositAmount(savedReservation.getReservationTime());
+    String orderId = "reservation-" + savedReservation.getId();
+    String orderName = "Ro:en Beauty 예약금";
+    int paymentAmount = calculateDepositAmount(savedReservation.getReservationTime());
 
-        Payment payment = new Payment(
-                savedReservation,
-                orderId,
-                paymentAmount
-        );
+    Payment payment = new Payment(
+            savedReservation,
+            orderId,
+            paymentAmount
+    );
 
-        Payment savedPayment = paymentRepository.save(payment);
+    Payment savedPayment = paymentRepository.save(payment);
 
-        return new CheckoutResponseDto(
-                savedReservation.getId(),
-                savedPayment.getId(),
-                savedPayment.getOrderId(),
-                orderName,
-                savedPayment.getAmount(),
-                savedReservation.getName(),
-                savedReservation.getUser().getEmail()
-        );
+    return new CheckoutResponseDto(
+            savedReservation.getId(),
+            savedPayment.getId(),
+            savedPayment.getOrderId(),
+            orderName,
+            savedPayment.getAmount(),
+            savedReservation.getName(),
+            savedReservation.getUser().getEmail()
+    );
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponseDto> getReservations(
+    public Page<ReservationResponseDto> getReservations(
             ReservationStatus status,
             LocalDate reservationDate,
-            String keyword
+            String keyword,
+            int page,
+            int size
     ) {
-        return reservationRepository
-                .findAllByOrderByReservationDateAscReservationTimeAsc()
-                .stream()
-                .filter(reservation ->
-                        status == null ||
-                        reservation.getStatus() == status
-                )
-                .filter(reservation ->
-                        reservationDate == null ||
-                        reservation.getReservationDate().equals(reservationDate)
-                )
-                .filter(reservation -> {
-                    if (keyword == null || keyword.isBlank()) {
-                        return true;
-                    }
+        Pageable pageable = PageRequest.of(page, size);
 
-                    String normalizedKeyword = keyword.replaceAll("\\s", "");
-                    String normalizedName = reservation.getName().replaceAll("\\s", "");
+        String normalizedKeyword = keyword == null
+                ? ""
+                : keyword.replaceAll("\\s", "").replaceAll("-", "");
 
-                    String numberKeyword = keyword.replaceAll("\\D", "");
-                    String normalizedPhone = reservation.getPhone().replaceAll("\\D", "");
+        Page<Reservation> reservations =
+                reservationRepository.searchReservations(
+                        status,
+                        reservationDate,
+                        normalizedKeyword,
+                        pageable
+                );
 
-                    boolean nameMatched = normalizedName.contains(normalizedKeyword);
-                    boolean phoneMatched = !numberKeyword.isBlank()
-                            && normalizedPhone.contains(numberKeyword);
-
-                    return nameMatched || phoneMatched;
-                })
-                .map(ReservationResponseDto::from)
-                .toList();
+        return reservations.map(ReservationResponseDto::from);
     }
 
     @Transactional

@@ -389,6 +389,38 @@ footer {
     background: #f3f1ee;
 }
 
+.pagination-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid #d6d0c9;
+    background: white;
+    color: #7a6f66;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background: #a38b7b;
+    color: white;
+    border-color: #a38b7b;
+}
+
+.page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
     .header-inner {
         flex-direction: column;
@@ -562,6 +594,8 @@ footer {
             </div>
         </div>
 
+        <div id="pagination" class="pagination-wrap" style="display:none;"></div>
+
         <div class="btn-wrap">
             <a href="/reservation.html" class="btn btn-main">예약 페이지로</a>
             <a href="/index.html" class="btn btn-sub">메인으로 돌아가기</a>
@@ -614,6 +648,8 @@ function handleAuthError(response) {
 let currentStatus = "ALL";
 let currentReservationDate = "";
 let currentKeyword = "";
+let currentPage = 0;
+let pageSize = 10;
 let reservationMap = {};
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -684,16 +720,19 @@ async function loadReservations() {
             throw new Error("예약 조회 실패");
         }
 
-        const reservations = await response.json();
+        const pageData = await response.json();
+        const reservations = pageData.content || [];
 
         loadingMessage.style.display = "none";
 
-        if (!reservations || reservations.length === 0) {
+        if (reservations.length === 0) {
             emptyMessage.style.display = "block";
+            renderPagination(pageData);
             return;
         }
 
         renderReservations(reservations);
+        renderPagination(pageData);
         tableCard.style.display = "block";
     } catch (error) {
         console.error(error);
@@ -718,6 +757,9 @@ function buildReservationApiUrl() {
     if (currentKeyword) {
         params.append("keyword", currentKeyword);
     }
+
+    params.append("page", currentPage);
+    params.append("size", pageSize);
 
     const queryString = params.toString();
 
@@ -751,6 +793,55 @@ function renderReservations(reservations) {
 
         tbody.appendChild(tr);
     });
+}
+
+function renderPagination(pageData) {
+    const pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    if (!pageData || pageData.totalPages <= 1) {
+        pagination.style.display = "none";
+        return;
+    }
+
+    pagination.style.display = "flex";
+
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "page-btn";
+    prevBtn.textContent = "이전";
+    prevBtn.disabled = pageData.first;
+    prevBtn.onclick = function () {
+        currentPage -= 1;
+        loadReservations();
+    };
+    pagination.appendChild(prevBtn);
+
+    for (let i = 0; i < pageData.totalPages; i++) {
+        const pageBtn = document.createElement("button");
+        pageBtn.className = "page-btn";
+
+        if (i === pageData.number) {
+            pageBtn.classList.add("active");
+        }
+
+        pageBtn.textContent = i + 1;
+        pageBtn.onclick = function () {
+            currentPage = i;
+            loadReservations();
+        };
+
+        pagination.appendChild(pageBtn);
+    }
+
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "page-btn";
+    nextBtn.textContent = "다음";
+    nextBtn.disabled = pageData.last;
+    nextBtn.onclick = function () {
+        currentPage += 1;
+        loadReservations();
+    };
+    pagination.appendChild(nextBtn);
 }
 
 function renderActionButtons(reservation) {
@@ -860,6 +951,7 @@ function searchReservations() {
     currentStatus = document.getElementById("statusFilter").value;
     currentReservationDate = document.getElementById("reservationDateFilter").value;
     currentKeyword = document.getElementById("keywordFilter").value.trim();
+    currentPage = 0;
 
     hideCancelReasonPopup();
     loadReservations();
@@ -869,6 +961,7 @@ function resetSearchConditions() {
     currentStatus = "ALL";
     currentReservationDate = "";
     currentKeyword = "";
+    currentPage = 0;
 
     document.getElementById("statusFilter").value = "ALL";
     document.getElementById("reservationDateFilter").value = "";

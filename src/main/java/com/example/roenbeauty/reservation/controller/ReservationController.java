@@ -7,6 +7,8 @@ import com.example.roenbeauty.reservation.dto.ReservationResponseDto;
 import com.example.roenbeauty.reservation.dto.ReservationUpdateStatusRequestDto;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import com.example.roenbeauty.reservation.service.ReservationService;
+
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -33,14 +35,16 @@ public class ReservationController {
     }
 
     @GetMapping
-    public List<ReservationResponseDto> getReservations(
+    public Page<ReservationResponseDto> getReservations(
             @RequestParam(name = "status", required = false) ReservationStatus status,
             @RequestParam(name = "reservationDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate reservationDate,
-            @RequestParam(name = "keyword", required = false) String keyword
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        return reservationService.getReservations(status, reservationDate, keyword);
+        return reservationService.getReservations(status, reservationDate, keyword, page, size);
     }
 
     @PatchMapping("/{id}/status")
