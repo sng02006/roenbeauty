@@ -205,15 +205,21 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponseDto> getMyReservations(AuthUser authUser) {
-        List<Reservation> reservations =
-                reservationRepository.findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(
-                        authUser.getUserId()
-                );
+    public Page<ReservationResponseDto> getMyReservations(
+            AuthUser authUser,
+            int page,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
 
-        return reservations.stream()
-                .map(ReservationResponseDto::from)
-                .toList();
+        Page<Reservation> reservations =
+                reservationRepository
+                        .findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(
+                                authUser.getUserId(),
+                                pageable
+                        );
+
+        return reservations.map(ReservationResponseDto::from);
     }
 
     private int calculateDepositAmount(LocalTime reservationTime) {

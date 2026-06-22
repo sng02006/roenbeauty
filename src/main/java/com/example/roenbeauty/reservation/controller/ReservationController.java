@@ -75,9 +75,15 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    public List<ReservationResponseDto> getMyReservations(
-            @AuthenticationPrincipal AuthUser authUser
+    public Page<ReservationResponseDto> getMyReservations(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size
     ) {
-        return reservationService.getMyReservations(authUser);
+        return reservationService.getMyReservations(
+                authUser,
+                page,
+                size
+        );
     }
 }

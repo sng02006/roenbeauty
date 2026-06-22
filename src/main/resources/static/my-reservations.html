@@ -328,6 +328,29 @@ footer {
     color: #a38b7b;
     font-weight: 600;
 }
+
+.pagination-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    min-width: 38px;
+    height: 38px;
+    border: 1px solid #d6d0c9;
+    border-radius: 999px;
+    background: white;
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background: #a38b7b;
+    color: white;
+    border-color: #a38b7b;
+}
 </style>
 </head>
 
@@ -381,6 +404,8 @@ footer {
     <div class="container">
         <div id="reservationList" class="reservation-list"></div>
 
+        <div id="pagination" class="pagination-wrap"></div>
+
         <div class="btn-wrap">
             <a href="/reservation.html" class="btn btn-main">새 예약하기</a>
         </div>
@@ -395,6 +420,9 @@ footer {
 
 <script>
 const TOSS_CLIENT_KEY = "test_ck_ALnQvDd2VJG4WWjqZnabrMj7X41m";
+
+let currentPage = 0;
+const pageSize = 5;
 
 document.addEventListener("DOMContentLoaded", async function () {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -437,11 +465,15 @@ async function loadMyReservations() {
     const list = document.getElementById("reservationList");
 
     try {
-        const res = await fetch("/api/reservations/my", {
-            headers: {
-                "Authorization": "Bearer " + localStorage.getItem("accessToken")
+        const res = await fetch(
+            `/api/reservations/my?page=${currentPage}&size=${pageSize}`,
+            {
+                headers: {
+                    "Authorization":
+                        "Bearer " + localStorage.getItem("accessToken")
+                }
             }
-        });
+        );
 
         if (!res.ok) {
             const errorText = await res.text();
@@ -450,7 +482,8 @@ async function loadMyReservations() {
             return;
         }
 
-        const reservations = await res.json();
+        const pageData = await res.json();
+        const reservations = pageData.content;
 
         if (reservations.length === 0) {
             list.innerHTML = `
@@ -461,6 +494,8 @@ async function loadMyReservations() {
             `;
             return;
         }
+
+        renderPagination(pageData);
 
         list.innerHTML = "";
 
@@ -679,6 +714,61 @@ function formatPhone(phone) {
     }
 
     return phone;
+}
+
+function renderPagination(pageData) {
+
+    const pagination =
+        document.getElementById("pagination");
+
+    pagination.innerHTML = "";
+
+    if (!pageData || pageData.totalPages <= 1) {
+        return;
+    }
+
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "page-btn";
+    prevBtn.textContent = "이전";
+    prevBtn.disabled = pageData.first;
+
+    prevBtn.onclick = function () {
+        currentPage--;
+        loadMyReservations();
+    };
+
+    pagination.appendChild(prevBtn);
+
+    for (let i = 0; i < pageData.totalPages; i++) {
+
+        const btn = document.createElement("button");
+
+        btn.className =
+            "page-btn" +
+            (i === pageData.number ? " active" : "");
+
+        btn.textContent = i + 1;
+
+        btn.onclick = function () {
+            currentPage = i;
+            loadMyReservations();
+        };
+
+        pagination.appendChild(btn);
+    }
+
+    const nextBtn = document.createElement("button");
+
+    nextBtn.className = "page-btn";
+    nextBtn.textContent = "다음";
+    nextBtn.disabled = pageData.last;
+
+    nextBtn.onclick = function () {
+        currentPage++;
+        loadMyReservations();
+    };
+
+    pagination.appendChild(nextBtn);
 }
 </script>
 </body>
