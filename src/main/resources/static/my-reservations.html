@@ -86,7 +86,7 @@ nav a.active {
 }
 
 .page-hero {
-    padding: 80px 0 40px;
+    padding: 48px 0 28px;
     text-align: center;
 }
 
@@ -124,19 +124,20 @@ nav a.active {
     background: white;
     border: 1px solid #ece7e1;
     border-radius: 20px;
-    padding: 28px;
+    padding: 22px 24px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 .card-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 .card-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #3f3a36;
 }
@@ -177,8 +178,8 @@ nav a.active {
 
 .info-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 36px;
 }
 
 .info-item {
@@ -193,8 +194,8 @@ nav a.active {
 }
 
 .memo {
-    margin-top: 18px;
-    padding: 16px;
+    margin-top: 16px;
+    padding: 14px 16px;
     border-radius: 14px;
     background: #f8f6f3;
     color: #666;
@@ -263,22 +264,42 @@ footer {
         justify-content: center;
     }
 
+    .page-hero {
+        padding: 46px 0 26px;
+    }
+
     .page-hero h1 {
         font-size: 32px;
     }
 
+    .reservation-card {
+        padding: 20px 18px;
+    }
+
+    .reservation-list {
+        gap: 14px;
+    }
+
+    .card-actions {
+        text-align: left;
+    }
+
+    .memo {
+        margin-top: 12px;
+        padding: 14px;
+    }
+}
+
+@media (max-width: 520px) {
     .info-grid {
         grid-template-columns: 1fr;
+        gap: 8px;
     }
 
     .card-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
-    }
-
-    .card-actions {
-        text-align: left;
     }
 }
 
