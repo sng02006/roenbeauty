@@ -80,9 +80,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reservations/available-times").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reservation-notice").permitAll()
 
-                        // 로그인 필요: 예약/결제
+                        // 로그인 필요: 예약/결제/취소
                         .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/reservations/my").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/reservations/*/cancel").authenticated()
                         .requestMatchers("/api/reservations/*/payments/**").authenticated()
 
                         // 관리자 전용: 예약 관리

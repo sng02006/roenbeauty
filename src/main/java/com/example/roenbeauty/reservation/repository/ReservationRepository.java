@@ -14,80 +14,96 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    Page<Reservation> findAllByOrderByReservationDateDescReservationTimeDesc(Pageable pageable);
+        Page<Reservation> findAllByOrderByReservationDateDescReservationTimeDesc(Pageable pageable);
 
-    Page<Reservation> findByStatusOrderByReservationDateDescReservationTimeDesc(
-            ReservationStatus status,
-            Pageable pageable
-    );
-
-    Page<Reservation> findByReservationDateOrderByReservationTimeAsc(
-            LocalDate reservationDate,
-            Pageable pageable
-    );
-
-    Page<Reservation> findByStatusAndReservationDateOrderByReservationTimeAsc(
-            ReservationStatus status,
-            LocalDate reservationDate,
-            Pageable pageable
-    );
-
-    @Query("""
-                SELECT r
-                FROM Reservation r
-                WHERE (:status IS NULL OR r.status = :status)
-                AND (:reservationDate IS NULL OR r.reservationDate = :reservationDate)
-                AND (
-                        :keyword IS NULL
-                        OR :keyword = ''
-                        OR REPLACE(r.name, ' ', '') LIKE CONCAT('%', :keyword, '%')
-                        OR REPLACE(r.phone, '-', '') LIKE CONCAT('%', :keyword, '%')
-                )
-                ORDER BY r.reservationDate DESC, r.reservationTime DESC
-                """)
-        Page<Reservation> searchReservations(
-                @Param("status") ReservationStatus status,
-                @Param("reservationDate") LocalDate reservationDate,
-                @Param("keyword") String keyword,
+        Page<Reservation> findByStatusOrderByReservationDateDescReservationTimeDesc(
+                ReservationStatus status,
                 Pageable pageable
         );
 
-    List<Reservation> findAllByOrderByReservationDateAscReservationTimeAsc();
+        Page<Reservation> findByReservationDateOrderByReservationTimeAsc(
+                LocalDate reservationDate,
+                Pageable pageable
+        );
 
-    Page<Reservation> findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(
-            Long userId,
-            Pageable pageable
-    );
+        Page<Reservation> findByStatusAndReservationDateOrderByReservationTimeAsc(
+                ReservationStatus status,
+                LocalDate reservationDate,
+                Pageable pageable
+        );
 
-    List<Reservation> findByStatusOrderByReservationDateAscReservationTimeAsc(ReservationStatus status);
+        @Query("""
+                        SELECT r
+                        FROM Reservation r
+                        WHERE (:status IS NULL OR r.status = :status)
+                        AND (:reservationDate IS NULL OR r.reservationDate = :reservationDate)
+                        AND (
+                                :keyword IS NULL
+                                OR :keyword = ''
+                                OR REPLACE(r.name, ' ', '') LIKE CONCAT('%', :keyword, '%')
+                                OR REPLACE(r.phone, '-', '') LIKE CONCAT('%', :keyword, '%')
+                        )
+                        ORDER BY r.reservationDate DESC, r.reservationTime DESC
+                        """)
+                Page<Reservation> searchReservations(
+                        @Param("status") ReservationStatus status,
+                        @Param("reservationDate") LocalDate reservationDate,
+                        @Param("keyword") String keyword,
+                        Pageable pageable
+                );
 
-    List<Reservation> findByReservationDateOrderByReservationTimeAsc(LocalDate reservationDate);
+        List<Reservation> findAllByOrderByReservationDateAscReservationTimeAsc();
 
-    List<Reservation> findByStatusAndReservationDateOrderByReservationTimeAsc(
-            ReservationStatus status,
-            LocalDate reservationDate
-    );
+        @Query("""
+                SELECT r
+                FROM Reservation r
+                WHERE r.user.id = :userId
+                ORDER BY
+                CASE r.status
+                        WHEN 'WAITING_PAYMENT' THEN 1
+                        WHEN 'PAID' THEN 2
+                        WHEN 'CONFIRMED' THEN 3
+                        WHEN 'COMPLETED' THEN 4
+                        WHEN 'CANCELED' THEN 4
+                        ELSE 5
+                END ASC,
+                r.reservationDate DESC,
+                r.reservationTime DESC
+                """)
+        Page<Reservation> findMyReservationsOrderByPriority(
+                @Param("userId") Long userId,
+                Pageable pageable
+        );
 
-    List<Reservation> findByReservationDateAndStatusNotOrderByReservationTimeAsc(
-            LocalDate reservationDate,
-            ReservationStatus status
-    );
+        List<Reservation> findByStatusOrderByReservationDateAscReservationTimeAsc(ReservationStatus status);
 
-    boolean existsByReservationDateAndReservationTimeAndStatusNot(
-            LocalDate reservationDate,
-            LocalTime reservationTime,
-            ReservationStatus status
-    );
+        List<Reservation> findByReservationDateOrderByReservationTimeAsc(LocalDate reservationDate);
 
-    List<Reservation> findByReservationDateAndStatusNot(
-            LocalDate reservationDate,
-            ReservationStatus status
-    );
+        List<Reservation> findByStatusAndReservationDateOrderByReservationTimeAsc(
+                ReservationStatus status,
+                LocalDate reservationDate
+        );
 
-    List<Reservation> findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(Long userId);
+        List<Reservation> findByReservationDateAndStatusNotOrderByReservationTimeAsc(
+                LocalDate reservationDate,
+                ReservationStatus status
+        );
 
-    List<Reservation> findByStatusAndCreatedAtBefore(
-            ReservationStatus status,
-            LocalDateTime createdAt
-    );
+        boolean existsByReservationDateAndReservationTimeAndStatusNot(
+                LocalDate reservationDate,
+                LocalTime reservationTime,
+                ReservationStatus status
+        );
+
+        List<Reservation> findByReservationDateAndStatusNot(
+                LocalDate reservationDate,
+                ReservationStatus status
+        );
+
+        List<Reservation> findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(Long userId);
+
+        List<Reservation> findByStatusAndCreatedAtBefore(
+                ReservationStatus status,
+                LocalDateTime createdAt
+        );
 }

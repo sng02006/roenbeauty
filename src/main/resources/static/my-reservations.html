@@ -130,10 +130,11 @@ nav a.active {
 
 .card-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
     margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 .card-title {
@@ -294,12 +295,6 @@ footer {
     .info-grid {
         grid-template-columns: 1fr;
         gap: 8px;
-    }
-
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
     }
 }
 
@@ -504,6 +499,15 @@ async function loadMyReservations() {
         }
 
         const pageData = await res.json();
+
+        if (
+            pageData.totalPages > 0 &&
+            currentPage >= pageData.totalPages
+        ) {
+            currentPage = pageData.totalPages - 1;
+            return loadMyReservations();
+        }
+
         const reservations = pageData.content;
 
         if (reservations.length === 0) {
@@ -536,7 +540,6 @@ async function loadMyReservations() {
                     <div class="info-item"><strong>날짜</strong> ${r.reservationDate}</div>
                     <div class="info-item"><strong>시간</strong> ${formatTime(r.reservationTime)}</div>
                     <div class="info-item"><strong>소요시간</strong> ${r.durationMinutes}분</div>
-                    <div class="info-item"><strong>상태</strong> ${getStatusText(r.status)}</div>
                 </div>
 
                 <div class="memo">
@@ -566,6 +569,12 @@ function renderActionButton(reservation) {
                     onclick="continuePayment(${reservation.id})">
                     결제 이어하기
                 </button>
+
+                <button
+                    class="btn btn-cancel"
+                    onclick="cancelReservation(${reservation.id}, '${reservation.status}')">
+                    예약 취소
+                </button>
             </div>
         `;
     }
@@ -578,7 +587,7 @@ function renderActionButton(reservation) {
             <div class="card-actions">
                 <button
                     class="btn btn-cancel"
-                    onclick="cancelReservation(${reservation.id})">
+                    onclick="cancelReservation(${reservation.id}, '${reservation.status}')">
                     예약 취소
                 </button>
             </div>
@@ -648,34 +657,59 @@ async function continuePayment(reservationId) {
     }
 }
 
-async function cancelReservation(id) {
-    const reason = prompt("취소 사유를 입력해주세요.");
+async function cancelReservation(id, status) {
+    const isWaitingPayment = status === "WAITING_PAYMENT";
 
-    if (reason === null) {
-        return;
+    let reason = "";
+
+    if (isWaitingPayment) {
+        if (!confirm("결제 대기 중인 예약을 취소하시겠습니까?")) {
+            return;
+        }
+
+        reason = "결제 전 고객 취소";
+    } else {
+        reason = prompt("취소 사유를 입력해주세요.");
+
+        if (reason === null) {
+            return;
+        }
     }
 
     try {
-        const response = await fetch(`/api/reservations/${id}/payments/cancel`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization":
-                    "Bearer " + localStorage.getItem("accessToken")
-            },
-            body: JSON.stringify({
-                cancelReason: reason,
-                canceledBy: "CUSTOMER"
+        const response = isWaitingPayment
+            ? await fetch(`/api/reservations/${id}/cancel`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization":
+                        "Bearer " + localStorage.getItem("accessToken")
+                }
             })
-        });
+            : await fetch(`/api/reservations/${id}/payments/cancel`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization":
+                        "Bearer " + localStorage.getItem("accessToken")
+                },
+                body: JSON.stringify({
+                    cancelReason: reason,
+                    canceledBy: "CUSTOMER"
+                })
+            });
 
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(errorText || "예약 취소 실패");
         }
 
-        alert("예약 및 결제가 취소되었습니다.");
-        location.reload();
+        alert(isWaitingPayment
+            ? "예약이 취소되었습니다."
+            : "예약 및 결제가 취소되었습니다.");
+
+        await loadMyReservations();
+
     } catch (error) {
         console.error(error);
         alert(error.message || "예약 취소 중 오류가 발생했습니다.");

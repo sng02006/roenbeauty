@@ -14,6 +14,7 @@ import com.example.roenbeauty.reservation.dto.ReservationCreateRequestDto;
 import com.example.roenbeauty.reservation.dto.ReservationResponseDto;
 import com.example.roenbeauty.reservation.dto.ReservationUpdateStatusRequestDto;
 import com.example.roenbeauty.reservation.entity.Reservation;
+import com.example.roenbeauty.reservation.enums.CanceledBy;
 import com.example.roenbeauty.reservation.enums.ReservationStatus;
 import com.example.roenbeauty.reservation.repository.ReservationRepository;
 import com.example.roenbeauty.user.entity.User;
@@ -214,13 +215,42 @@ public class ReservationService {
 
         Page<Reservation> reservations =
                 reservationRepository
-                        .findAllByUser_IdOrderByReservationDateDescReservationTimeDesc(
+                        .findMyReservationsOrderByPriority(
                                 authUser.getUserId(),
                                 pageable
                         );
 
         return reservations.map(ReservationResponseDto::from);
     }
+
+    @Transactional
+public ReservationResponseDto cancelMyWaitingPaymentReservation(
+        AuthUser authUser,
+        Long id
+) {
+    Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("해당 예약이 존재하지 않습니다."));
+
+    if (!reservation.getUser().getId().equals(authUser.getUserId())) {
+        throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
+    }
+
+    if (reservation.getStatus() != ReservationStatus.WAITING_PAYMENT) {
+        throw new IllegalArgumentException("결제 대기 상태의 예약만 취소할 수 있습니다.");
+    }
+
+    reservation.cancel(
+            CanceledBy.CUSTOMER,
+            "결제 전 고객 취소"
+    );
+
+    Payment payment = paymentRepository.findByReservation(reservation)
+            .orElseThrow(() -> new IllegalArgumentException("결제 정보가 존재하지 않습니다."));
+
+    payment.fail();
+
+    return ReservationResponseDto.from(reservation);
+}
 
     private int calculateDepositAmount(LocalTime reservationTime) {
         int amount = DEPOSIT_AMOUNT;

@@ -55,6 +55,14 @@ public class ReservationController {
         return reservationService.updateReservationStatus(id, requestDto);
     }
 
+    @PatchMapping("/{id}/cancel")
+    public ReservationResponseDto cancelMyReservation(
+            @AuthenticationPrincipal AuthUser authUser,
+            @PathVariable("id") Long id
+    ) {
+        return reservationService.cancelMyWaitingPaymentReservation(authUser, id);
+    }
+
     @GetMapping("/reserved-times")
     public List<String> getReservedTimes(
             @RequestParam(name = "reservationDate")
