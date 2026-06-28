@@ -152,6 +152,7 @@ textarea {
 
 .notice-box {
     margin-top: 26px;
+    margin-bottom: 22px;
     padding: 20px;
     border-radius: 16px;
     background: #f5f1ec;
@@ -173,7 +174,7 @@ textarea {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
-    margin-top: 28px;
+    margin-top: 18px;
 }
 
 .btn {
@@ -214,6 +215,23 @@ footer {
     font-size: 14px;
 }
 
+.footer-info {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.7;
+}
+
+.footer-links {
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.footer-links a {
+    margin: 0 8px;
+    color: #ddd;
+}
+
 @media (max-width: 768px) {
     .header-inner {
         flex-direction: column;
@@ -250,10 +268,28 @@ footer {
     color: #6c635c;
 }
 
+.checkbox-label a {
+    color: #8f7868;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: 0.2s;
+}
+
+.checkbox-label a:hover {
+    color: #6f5a4d;
+}
+
 .checkbox-label input {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     cursor: pointer;
+    flex-shrink: 0;
+}
+
+.checkbox-area {
+    border-top: 1px dashed #e6ddd5;
+    padding-top: 18px;
 }
 
 .auth-box {
@@ -426,8 +462,18 @@ footer {
                     </div>
                 </div>
 
+                <div class="form-group full checkbox-area">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="agreeTerms">
+                        <span>
+                            <a href="/terms.html" target="_blank">이용약관</a> 및
+                            <a href="/privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
+                        </span>
+                    </label>
+                </div>
+
                 <div class="btn-wrap">
-                    <button type="submit" class="btn btn-main">예약금 결제하기</button>
+                    <button type="submit" class="btn btn-main">예약 신청 및 결제</button>
                     <a href="/index.html" class="btn btn-sub">메인으로 돌아가기</a>
                 </div>
             </form>
@@ -436,7 +482,17 @@ footer {
 </section>
 
 <footer>
-    © 2026 Ro:en Beauty
+    <div>© 2026 Ro:en Beauty</div>
+
+    <div class="footer-info">
+        로엔뷰티(ROEN BEAUTY) | 대표 박경진 | 사업자등록번호 583-22-02301<br>
+        대구광역시 수성구 범어로24길 21, 1층(범어동) | 문의 전화 010-8293-5683
+    </div>
+
+    <div class="footer-links">
+        <a href="/terms.html">이용약관</a>
+        <a href="/privacy.html">개인정보처리방침</a>
+    </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -727,6 +783,13 @@ document.getElementById("reservationForm").addEventListener("submit", async func
 
     if (hour >= 20 && !extraChargeAgree.checked) {
         alert("20시 이후 예약은 추가금 동의가 필요합니다.");
+        return;
+    }
+
+    const agreeTerms = document.getElementById("agreeTerms");
+
+    if (!agreeTerms.checked) {
+        alert("이용약관 및 개인정보처리방침에 동의해주세요.");
         return;
     }
 

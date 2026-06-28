@@ -6,13 +6,18 @@
 
 <style>
 body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
     background: #f8f6f3;
     font-family: Arial, sans-serif;
 }
 
 .auth-container {
+    flex: 1;
     width: 400px;
-    margin: 100px auto;
+    margin: 100px auto 60px;
     padding: 40px;
     background: #fffaf5;
     border-radius: 12px;
@@ -64,6 +69,39 @@ body {
     color: #a68b6d;
     text-decoration: none;
 }
+
+/* 푸터 */
+footer {
+    background: #2f2f2f;
+    color: #ddd;
+    text-align: center;
+    padding: 25px;
+    font-size: 14px;
+}
+
+.footer-info {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.7;
+}
+
+.footer-links {
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.footer-links a {
+    margin: 0 8px;
+    color: #ddd;
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        width: 90%;
+        padding: 32px 24px;
+    }
+}
 </style>
 </head>
 
@@ -84,6 +122,14 @@ body {
             maxlength="11"
         >
 
+        <label style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#666; text-align:left; margin-bottom:18px;">
+            <input type="checkbox" id="agreeTerms" required style="margin-top:3px;">
+            <span>
+                <a href="/terms.html" target="_blank">이용약관</a> 및
+                <a href="/privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
+            </span>
+        </label>
+
         <button type="submit" class="auth-btn">회원가입</button>
     </form>
 
@@ -91,6 +137,20 @@ body {
         이미 계정이 있으신가요? <a href="login.html">로그인</a>
     </div>
 </div>
+
+<footer>
+    <div>© 2026 Ro:en Beauty</div>
+
+    <div class="footer-info">
+        로엔뷰티(ROEN BEAUTY) | 대표 박경진 | 사업자등록번호 583-22-02301<br>
+        대구광역시 수성구 범어로24길 21, 1층(범어동) | 문의 전화 010-8293-5683
+    </div>
+
+    <div class="footer-links">
+        <a href="/terms.html">이용약관</a>
+        <a href="/privacy.html">개인정보처리방침</a>
+    </div>
+</footer>
 
 <script>
 document.getElementById("signupForm").addEventListener("submit", async function(e) {
@@ -105,6 +165,13 @@ document.getElementById("signupForm").addEventListener("submit", async function(
 
     if (!/^01[0-9]\d{7,8}$/.test(phone)) {
         alert("올바른 휴대폰 번호를 입력해주세요.");
+        return;
+    }
+
+    const agreeTerms = document.getElementById("agreeTerms");
+
+    if (!agreeTerms.checked) {
+        alert("이용약관 및 개인정보처리방침에 동의해주세요.");
         return;
     }
 
