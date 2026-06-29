@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 정보 | Ro:en Beauty</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+body {
+    font-family: "Noto Sans KR", sans-serif;
+    background: #f8f6f3;
+    color: #333;
+}
+
+.container {
+    width: min(1100px, 90%);
+    margin: 0 auto;
+}
+
+header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid #eee;
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 600;
+    color: #7a6f66;
+}
+
+nav ul {
+    display: flex;
+    gap: 25px;
+    list-style: none;
+}
+
+nav a {
+    font-size: 14px;
+    color: #666;
+    transition: 0.2s;
+}
+
+nav a:hover,
+nav a.active {
+    color: #a38b7b;
+    font-weight: 600;
+}
+
+.auth-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-btn {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #d6d0c9;
+    background: white;
+    color: #7a6f66;
+    transition: 0.2s;
+}
+
+.auth-btn:hover {
+    background: #f3f1ee;
+}
+
+.page-hero {
+    padding: 48px 0 28px;
+    text-align: center;
+}
+
+.page-hero h1 {
+    font-size: 40px;
+    color: #2f2f2f;
+    margin-bottom: 14px;
+    line-height: 1.3;
+}
+
+.page-hero p {
+    color: #777;
+    line-height: 1.8;
+}
+
+.info-section {
+    padding-bottom: 80px;
+}
+
+.info-layout {
+    display: grid;
+    gap: 22px;
+}
+
+.info-card {
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 20px;
+    padding: 26px 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #3f3a36;
+    margin-bottom: 18px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 36px;
+}
+
+.info-item {
+    font-size: 15px;
+    color: #555;
+}
+
+.info-item strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #7a6f66;
+    font-size: 13px;
+}
+
+.form-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6c635c;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #ddd5ce;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+}
+
+input:focus {
+    border-color: #a38b7b;
+    box-shadow: 0 0 0 3px rgba(163, 139, 123, 0.12);
+}
+
+.btn-wrap {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-main {
+    background: #a38b7b;
+    color: white;
+}
+
+.btn-main:hover {
+    background: #8f7868;
+}
+
+.btn-sub {
+    border: 1px solid #d6d0c9;
+    color: #7a6f66;
+    background: white;
+}
+
+.btn-danger {
+    background: #fdeaea;
+    color: #b04747;
+}
+
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+.danger-card {
+    border-color: #f3c8c8;
+    background: #fffafa;
+}
+
+.danger-card .card-title {
+    color: #b04747;
+}
+
+.danger-text {
+    color: #777;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+footer {
+    margin-top: 60px;
+    background: #2f2f2f;
+    color: #ddd;
+    text-align: center;
+    padding: 25px;
+    font-size: 14px;
+}
+
+.footer-info {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.7;
+}
+
+.footer-links {
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+.footer-links a {
+    margin: 0 8px;
+    color: #ddd;
+}
+
+.admin-dropdown {
+    position: relative;
+}
+
+.admin-dropdown-toggle {
+    cursor: pointer;
+}
+
+.admin-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 160px;
+    padding: 10px 0;
+    background: white;
+    border: 1px solid #ece7e1;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    list-style: none;
+    z-index: 100;
+}
+
+.admin-dropdown:hover .admin-dropdown-menu {
+    display: block;
+}
+
+.admin-dropdown-menu li {
+    width: 100%;
+}
+
+.admin-dropdown-menu a {
+    display: block;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+}
+
+.admin-dropdown-menu a:hover,
+.admin-dropdown-menu a.active {
+    background: #f8f6f3;
+    color: #a38b7b;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        height: auto;
+        padding: 16px 0;
+    }
+
+    nav ul {
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-hero h1 {
+        font-size: 32px;
+    }
+
+    .info-card {
+        padding: 22px 20px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="container header-inner">
+        <div class="logo"><a href="/index.html">Ro:en Beauty</a></div>
+
+        <nav>
+            <ul>
+                <li><a href="/index.html">메인</a></li>
+                <li><a href="/services.html">시술 메뉴</a></li>
+                <li><a href="/gallery.html">갤러리</a></li>
+                <li><a href="/reservation.html">예약하기</a></li>
+
+                <li class="my-menu" style="display:none;">
+                    <a href="/my-reservations.html">내 예약</a>
+                </li>
+
+                <li class="my-menu" style="display:none;">
+                    <a href="/my-info.html" class="active">내 정보</a>
+                </li>
+
+                <li class="admin-menu admin-dropdown" style="display:none;">
+                    <a href="#" class="admin-dropdown-toggle">관리자 메뉴 ▾</a>
+
+                    <ul class="admin-dropdown-menu">
+                        <li><a href="/admin-reservations.html">예약 관리</a></li>
+                        <li><a href="/admin-menu-settings.html">메뉴 관리</a></li>
+                        <li><a href="/admin-gallery.html">갤러리 관리</a></li>
+                        <li><a href="/admin-blocked-times.html">영업 시간 관리</a></li>
+                        <li><a href="/admin-settings.html">운영 설정</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="auth-box">
+            <a href="/login.html" id="loginBtn" class="auth-btn">로그인</a>
+            <a href="/signup.html" id="signupBtn" class="auth-btn">회원가입</a>
+            <a href="#" id="logoutBtn" class="auth-btn" style="display:none;">로그아웃</a>
+        </div>
+    </div>
+</header>
+
+<div class="page-hero">
+    <div class="container">
+        <h1>내 정보</h1>
+        <p>회원 정보와 로그인 방식을 확인하고 계정을 관리할 수 있습니다.</p>
+    </div>
+</div>
+
+<section class="info-section">
+    <div class="container info-layout">
+
+        <div class="info-card">
+            <div class="card-title">회원 정보</div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>이메일</strong>
+                    <span id="email">-</span>
+                </div>
+
+                <div class="info-item">
+                    <strong>가입 방식</strong>
+                    <span id="provider">-</span>
+                </div>
+
+                <div class="info-item">
+                    <strong>가입일</strong>
+                    <span id="createdAt">-</span>
+                </div>
+
+                <div class="info-item">
+                    <strong>이름</strong>
+                    <span id="name">-</span>
+                </div>
+
+                <div class="info-item">
+                    <strong>연락처</strong>
+                    <span id="phone">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card" id="passwordCard" style="display:none;">
+            <div class="card-title">비밀번호 변경</div>
+
+            <form id="passwordForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="currentPassword">현재 비밀번호</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPassword">새 비밀번호</label>
+                        <input type="password" id="newPassword" placeholder="8자 이상 입력해주세요" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPasswordConfirm">새 비밀번호 확인</label>
+                        <input type="password" id="newPasswordConfirm" required>
+                    </div>
+                </div>
+
+                <div class="btn-wrap">
+                    <button type="submit" class="btn btn-main">비밀번호 변경</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="info-card danger-card">
+            <div class="card-title">회원 탈퇴</div>
+
+            <p class="danger-text">
+                회원 탈퇴 시 이름, 이메일, 연락처 등 개인정보는 비식별화됩니다.<br>
+                예약 및 결제 내역은 서비스 운영과 통계 목적으로 개인을 식별할 수 없는 형태로 보관될 수 있습니다.
+            </p>
+
+            <div class="btn-wrap">
+                <button type="button" class="btn btn-danger" onclick="withdraw()">회원 탈퇴</button>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<footer>
+    <div>© 2026 Ro:en Beauty</div>
+
+    <div class="footer-info">
+        로엔뷰티(ROEN BEAUTY) | 대표 박경진 | 사업자등록번호 583-22-02301<br>
+        대구광역시 수성구 범어로24길 21, 1층(범어동) | 문의 전화 010-8293-5683
+    </div>
+
+    <div class="footer-links">
+        <a href="/terms.html">이용약관</a>
+        <a href="/privacy.html">개인정보처리방침</a>
+    </div>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (!user) {
+        alert("로그인 후 내 정보를 확인할 수 있습니다.");
+        location.href = "/login.html";
+        return;
+    }
+
+    loginBtn.style.display = "none";
+    signupBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+
+    document.querySelectorAll(".my-menu")
+        .forEach(menu => menu.style.display = "block");
+
+    if (user.role === "ADMIN" || user.role === "OWNER") {
+        document.querySelectorAll(".admin-menu")
+            .forEach(menu => menu.style.display = "block");
+    }
+
+    logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        clearLoginInfo();
+        location.href = "/index.html";
+    });
+
+    await loadMyInfo();
+});
+
+async function loadMyInfo() {
+    try {
+        const response = await fetch("/api/users/me", {
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("accessToken")
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("회원 정보를 불러오지 못했습니다.");
+        }
+
+        const userInfo = await response.json();
+
+        document.getElementById("email").textContent = userInfo.email || "-";
+        document.getElementById("name").textContent = userInfo.name || "-";
+        document.getElementById("phone").textContent = formatPhone(userInfo.phone);
+        document.getElementById("provider").textContent = formatProvider(userInfo.provider);
+        document.getElementById("createdAt").textContent = formatDate(userInfo.createdAt);
+
+        if (userInfo.provider === "LOCAL") {
+            document.getElementById("passwordCard").style.display = "block";
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "회원 정보 조회 중 오류가 발생했습니다.");
+    }
+}
+
+document.getElementById("passwordForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const newPasswordConfirm = document.getElementById("newPasswordConfirm").value;
+
+    if (newPassword.length < 8) {
+        alert("비밀번호는 8자 이상 입력해주세요.");
+        return;
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+        alert("새 비밀번호가 일치하지 않습니다.");
+        return;
+    }
+
+    if (newPassword === currentPassword) {
+        alert("기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.");
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/users/me/password", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + localStorage.getItem("accessToken")
+            },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword,
+                newPasswordConfirm
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "비밀번호 변경 실패");
+        }
+
+        alert("비밀번호가 변경되었습니다.");
+        this.reset();
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "비밀번호 변경 중 오류가 발생했습니다.");
+    }
+});
+
+async function withdraw() {
+    const firstConfirm = confirm(
+        "회원 탈퇴 시 개인정보가 비식별화되며, 계정 복구가 어렵습니다.\n정말 탈퇴하시겠습니까?"
+    );
+
+    if (!firstConfirm) {
+        return;
+    }
+
+    const secondConfirm = confirm(
+        "탈퇴 후에는 동일 계정으로 기존 예약 내역을 확인할 수 없습니다.\n그래도 진행하시겠습니까?"
+    );
+
+    if (!secondConfirm) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/users/me", {
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("accessToken")
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "회원 탈퇴 실패");
+        }
+
+        clearLoginInfo();
+
+        alert("회원 탈퇴가 완료되었습니다.");
+        location.href = "/index.html";
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "회원 탈퇴 중 오류가 발생했습니다.");
+    }
+}
+
+function clearLoginInfo() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+}
+
+function formatProvider(provider) {
+    switch (provider) {
+        case "LOCAL":
+            return "일반 회원";
+        case "KAKAO":
+            return "카카오 로그인";
+        case "NAVER":
+            return "네이버 로그인";
+        default:
+            return provider || "-";
+    }
+}
+
+function formatDate(value) {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return date.toLocaleDateString("ko-KR");
+}
+
+function formatPhone(phone) {
+    if (!phone) return "-";
+
+    const onlyNumber = phone.replace(/\D/g, "");
+
+    if (onlyNumber.length === 11) {
+        return onlyNumber.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+    }
+
+    if (onlyNumber.length === 10) {
+        return onlyNumber.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+    }
+
+    return phone;
+}
+</script>
+
+</body>
+</html>

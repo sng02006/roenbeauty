@@ -44,6 +44,18 @@ nav ul{
     list-style:none;
 }
 
+nav a {
+    font-size: 14px;
+    color: #666;
+    transition: 0.2s;
+}
+
+nav a:hover,
+nav a.active {
+    color: #a38b7b;
+    font-weight: 600;
+}
+
 .page-hero{
     padding:60px 0 30px;
     text-align:center;
@@ -102,9 +114,10 @@ footer{
     gap:10px;
 }
 
-nav ul{
-    flex-wrap:wrap;
-    justify-content:center;
+nav ul {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
 }
 
 .page-hero h1{
@@ -123,29 +136,35 @@ nav ul{
 <body>
 
 <header>
-<div class="container header-inner">
+    <div class="container header-inner">
+        <div class="logo">
+            <a href="/index.html">Ro:en Beauty</a>
+        </div>
 
-<div class="logo">
-<a href="/index.html">Ro:en Beauty</a>
-</div>
+        <nav>
+            <ul>
+                <li><a href="/index.html">메인</a></li>
+                <li><a href="/services.html">시술 메뉴</a></li>
+                <li><a href="/gallery.html">갤러리</a></li>
+                <li><a href="/reservation.html">예약하기</a></li>
 
-<nav>
-<ul>
-    <li><a href="/index.html">메인</a></li>
-    <li><a href="/services.html">시술 메뉴</a></li>
-    <li><a href="/gallery.html">갤러리</a></li>
-    <li><a href="/reservation.html">예약하기</a></li>
-</ul>
-</nav>
+                <li class="my-menu" style="display:none;">
+                    <a href="/my-reservations.html">내 예약</a>
+                </li>
 
-</div>
+                <li class="my-menu" style="display:none;">
+                    <a href="/my-info.html">내 정보</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </header>
 
 <div class="page-hero">
-<div class="container">
-<h1>이용약관</h1>
-<p>Ro:en Beauty 예약 서비스 이용약관입니다.</p>
-</div>
+    <div class="container">
+        <h1>이용약관</h1>
+        <p>Ro:en Beauty 예약 서비스 이용약관입니다.</p>
+    </div>
 </div>
 
 <main class="container">
@@ -180,11 +199,8 @@ nav ul{
 
 <ul>
     <li>예약 진행 시 예약금 결제가 필요합니다.</li>
-
     <li>예약금 결제가 완료되면 예약이 접수되며, 원장 확인 후 최종 확정됩니다.</li>
-
     <li>결제 대기 상태에서는 결제를 이어서 진행하거나 예약을 취소할 수 있습니다.</li>
-
     <li>결제 대기 상태에서는 다른 고객이 동일한 예약 시간을 선택할 수 없으며, 10분 이내에 결제가 완료되지 않으면 자동으로 취소됩니다.</li>
 </ul>
 
@@ -196,13 +212,9 @@ nav ul{
 
 <ul>
     <li>예약금은 시술 1종목당 20,000원입니다.</li>
-
     <li>2종목 이상 예약을 원하는 경우 각 시술을 개별 예약하거나 카카오톡 채널을 통해 별도로 문의하여 예약할 수 있습니다.</li>
-
     <li>예약 시간보다 10분 이상 늦게 방문하는 경우, 다음 예약 고객의 일정에 따라 시술이 제한되거나 예약이 취소될 수 있습니다.</li>
-
     <li>당일 예약 취소, 당일 예약 변경 및 노쇼(No-show)의 경우 예약금은 환불되지 않습니다.</li>
-
     <li>멤버십 이용 고객의 경우 당일 예약 취소, 당일 예약 변경 및 노쇼(No-show) 발생 시 예약금 상당액이 멤버십 적립금에서 차감됩니다.</li>
 </ul>
 
@@ -256,5 +268,18 @@ nav ul{
 
 </footer>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user) {
+        document.querySelectorAll(".my-menu")
+            .forEach(menu => menu.style.display = "block");
+    } else {
+        document.querySelectorAll(".my-menu")
+            .forEach(menu => menu.style.display = "none");
+    }
+});
+</script>
 </body>
 </html>

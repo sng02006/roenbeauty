@@ -67,9 +67,6 @@ public class SecurityConfig {
                                 "/api/users/kakao/login"
                         ).permitAll()
 
-                        // 로그인 필요 : 탈퇴
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
-
                         // 공개 조회 API
                         .requestMatchers(HttpMethod.GET, "/api/menus").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/menus/category/**").permitAll()
@@ -82,6 +79,11 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/reservations/available-times").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reservation-notice").permitAll()
+
+                        // 로그인 필요: 회원 정보
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/users/me/password").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
 
                         // 로그인 필요: 예약/결제/취소
                         .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated()

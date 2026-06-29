@@ -10,7 +10,9 @@ import com.example.roenbeauty.user.dto.KakaoTokenResponseDto;
 import com.example.roenbeauty.user.dto.KakaoUserResponseDto;
 import com.example.roenbeauty.user.dto.LoginRequestDto;
 import com.example.roenbeauty.user.dto.LoginResponseDto;
+import com.example.roenbeauty.user.dto.PasswordChangeRequestDto;
 import com.example.roenbeauty.user.dto.SignupRequestDto;
+import com.example.roenbeauty.user.dto.UserInfoResponseDto;
 import com.example.roenbeauty.user.entity.User;
 import com.example.roenbeauty.user.enums.OAuthProvider;
 import com.example.roenbeauty.user.enums.UserRole;
@@ -136,5 +138,46 @@ public class UserService {
         reservations.forEach(Reservation::anonymizeCustomerInfo);
 
         user.withdraw();
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfoResponseDto getMyInfo(AuthUser authUser) {
+        User user = userRepository.findById(authUser.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        return UserInfoResponseDto.from(user);
+    }
+
+    @Transactional
+    public void changePassword(
+            AuthUser authUser,
+            PasswordChangeRequestDto requestDto
+    ) {
+        User user = userRepository.findById(authUser.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        if (user.getProvider() != OAuthProvider.LOCAL) {
+            throw new IllegalArgumentException("현재 로그인 방식에서는 비밀번호를 변경할 수 없습니다.");
+        }
+
+        if (!requestDto.getNewPassword().equals(requestDto.getNewPasswordConfirm())) {
+            throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
+        }
+
+        if (requestDto.getNewPassword().length() < 8) {
+            throw new IllegalArgumentException("비밀번호는 8자 이상 입력해주세요.");
+        }
+
+        if (requestDto.getNewPassword().equals(requestDto.getCurrentPassword())) {
+            throw new IllegalArgumentException("기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.");
+        }
+
+        if (!passwordEncoder.matches(requestDto.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        }
+
+        user.changePassword(
+                passwordEncoder.encode(requestDto.getNewPassword())
+        );
     }
 }

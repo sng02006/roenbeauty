@@ -48,6 +48,18 @@ nav ul {
 nav a {
     font-size: 14px;
     color: #666;
+    transition: 0.2s;
+}
+
+nav a:hover,
+nav a.active {
+    color: #a38b7b;
+    font-weight: 600;
+}
+
+nav a {
+    font-size: 14px;
+    color: #666;
 }
 
 .page-hero {
@@ -118,7 +130,7 @@ footer {
     nav ul {
         flex-wrap: wrap;
         justify-content: center;
-        gap: 14px;
+        gap: 16px;
     }
 
     .page-hero h1 {
@@ -137,14 +149,22 @@ footer {
 <header>
     <div class="container header-inner">
         <div class="logo"><a href="/index.html">Ro:en Beauty</a></div>
-        <nav>
-            <ul>
-                <li><a href="/index.html">메인</a></li>
-                <li><a href="/services.html">시술 메뉴</a></li>
-                <li><a href="/gallery.html">갤러리</a></li>
-                <li><a href="/reservation.html">예약하기</a></li>
-            </ul>
-        </nav>
+            <nav>
+                <ul>
+                    <li><a href="/index.html">메인</a></li>
+                    <li><a href="/services.html">시술 메뉴</a></li>
+                    <li><a href="/gallery.html">갤러리</a></li>
+                    <li><a href="/reservation.html">예약하기</a></li>
+
+                    <li class="my-menu" style="display:none;">
+                        <a href="/my-reservations.html">내 예약</a>
+                    </li>
+
+                    <li class="my-menu" style="display:none;">
+                        <a href="/my-info.html">내 정보</a>
+                    </li>
+                </ul>
+            </nav>
     </div>
 </header>
 
@@ -235,5 +255,18 @@ footer {
     </div>
 </footer>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user) {
+        document.querySelectorAll(".my-menu")
+            .forEach(menu => menu.style.display = "block");
+    } else {
+        document.querySelectorAll(".my-menu")
+            .forEach(menu => menu.style.display = "none");
+    }
+});
+</script>
 </body>
 </html>
