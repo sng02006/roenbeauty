@@ -53,6 +53,10 @@ public class UserService {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
 
+        if (requestDto.getPassword().length() < 8) {
+            throw new IllegalArgumentException("비밀번호는 8자 이상 입력해주세요.");
+        }
+
         User user = new User(
                 requestDto.getEmail(),
                 passwordEncoder.encode(requestDto.getPassword()),
