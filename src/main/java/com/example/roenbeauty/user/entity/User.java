@@ -1,5 +1,7 @@
 package com.example.roenbeauty.user.entity;
 
+import java.time.LocalDateTime;
+
 import com.example.roenbeauty.global.common.BaseTimeEntity;
 import com.example.roenbeauty.user.enums.OAuthProvider;
 import com.example.roenbeauty.user.enums.UserRole;
@@ -44,6 +46,11 @@ public class User extends BaseTimeEntity {
     @Column(length = 100)
     private String providerId;
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
     protected User() {
     }
 
@@ -55,6 +62,16 @@ public class User extends BaseTimeEntity {
         this.role = role;
         this.provider = provider;
         this.providerId = providerId;
+    }
+
+    public void withdraw() {
+        this.email = "deleted-user-" + this.id + "@deleted.local";
+        this.password = null;
+        this.name = "탈퇴한 회원";
+        this.phone = "000-0000-0000";
+        this.providerId = null;
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -87,5 +104,13 @@ public class User extends BaseTimeEntity {
 
     public String getProviderId() {
         return providerId;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
     }
 }

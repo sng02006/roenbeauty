@@ -1,10 +1,14 @@
 package com.example.roenbeauty.user.controller;
 
+import com.example.roenbeauty.global.dto.AuthUser;
 import com.example.roenbeauty.user.dto.KakaoLoginRequestDto;
 import com.example.roenbeauty.user.dto.LoginRequestDto;
 import com.example.roenbeauty.user.dto.LoginResponseDto;
 import com.example.roenbeauty.user.dto.SignupRequestDto;
 import com.example.roenbeauty.user.service.UserService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,5 +34,13 @@ public class UserController {
     @PostMapping("/kakao/login")
     public LoginResponseDto kakaoLogin(@RequestBody KakaoLoginRequestDto requestDto) {
         return userService.kakaoLogin(requestDto);
+    }
+
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void withdraw(
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        userService.withdraw(authUser);
     }
 }

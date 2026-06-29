@@ -108,6 +108,11 @@ public class Reservation extends BaseTimeEntity {
         this.status = status;
     }
 
+    public void anonymizeCustomerInfo() {
+        this.name = "탈퇴한 회원";
+        this.phone = "000-0000-0000";
+    }
+
     public Long getId() {
         return id;
     }

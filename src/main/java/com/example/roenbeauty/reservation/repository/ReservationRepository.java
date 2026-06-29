@@ -106,4 +106,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 ReservationStatus status,
                 LocalDateTime createdAt
         );
+
+        List<Reservation> findAllByUser_Id(Long userId);
 }

@@ -67,6 +67,9 @@ public class SecurityConfig {
                                 "/api/users/kakao/login"
                         ).permitAll()
 
+                        // 로그인 필요 : 탈퇴
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/me").authenticated()
+
                         // 공개 조회 API
                         .requestMatchers(HttpMethod.GET, "/api/menus").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/menus/category/**").permitAll()

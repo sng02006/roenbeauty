@@ -1,6 +1,9 @@
 package com.example.roenbeauty.user.service;
 
+import com.example.roenbeauty.global.dto.AuthUser;
 import com.example.roenbeauty.global.security.JwtProvider;
+import com.example.roenbeauty.reservation.entity.Reservation;
+import com.example.roenbeauty.reservation.repository.ReservationRepository;
 import com.example.roenbeauty.user.client.KakaoClient;
 import com.example.roenbeauty.user.dto.KakaoLoginRequestDto;
 import com.example.roenbeauty.user.dto.KakaoTokenResponseDto;
@@ -12,6 +15,9 @@ import com.example.roenbeauty.user.entity.User;
 import com.example.roenbeauty.user.enums.OAuthProvider;
 import com.example.roenbeauty.user.enums.UserRole;
 import com.example.roenbeauty.user.repository.UserRepository;
+
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,17 +29,20 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final KakaoClient kakaoClient;
+    private final ReservationRepository reservationRepository;
 
     public UserService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtProvider jwtProvider,
-            KakaoClient kakaoClient
+            KakaoClient kakaoClient,
+            ReservationRepository reservationRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtProvider = jwtProvider;
         this.kakaoClient = kakaoClient;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
@@ -110,5 +119,22 @@ public class UserService {
         String accessToken = jwtProvider.createAccessToken(user);
 
         return LoginResponseDto.from(user, accessToken);
+    }
+
+    @Transactional
+    public void withdraw(AuthUser authUser) {
+        User user = userRepository.findById(authUser.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        if (user.isDeleted()) {
+            throw new IllegalArgumentException("이미 탈퇴한 회원입니다.");
+        }
+
+        List<Reservation> reservations =
+                reservationRepository.findAllByUser_Id(user.getId());
+
+        reservations.forEach(Reservation::anonymizeCustomerInfo);
+
+        user.withdraw();
     }
 }
