@@ -16,18 +16,24 @@ public class KakaoClient {
     private final String defaultRedirectUri;
     private final String tokenUri;
     private final String userInfoUri;
+    private final String unlinkUri;
+    private final String adminKey;
 
     public KakaoClient(
             @Value("${kakao.client-id}") String clientId,
             @Value("${kakao.redirect-uri}") String defaultRedirectUri,
             @Value("${kakao.token-uri}") String tokenUri,
-            @Value("${kakao.user-info-uri}") String userInfoUri
+            @Value("${kakao.user-info-uri}") String userInfoUri,
+            @Value("${kakao.unlink-uri}") String unlinkUri,
+            @Value("${kakao.admin-key}") String adminKey
     ) {
         this.restClient = RestClient.create();
         this.clientId = clientId;
         this.defaultRedirectUri = defaultRedirectUri;
         this.tokenUri = tokenUri;
         this.userInfoUri = userInfoUri;
+        this.unlinkUri = unlinkUri;
+        this.adminKey = adminKey;
     }
 
     public KakaoTokenResponseDto getToken(String code, String redirectUri) {
@@ -59,5 +65,21 @@ public class KakaoClient {
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(KakaoUserResponseDto.class);
+    }
+
+    public void unlinkByAdminKey(String providerId) {
+        LinkedMultiValueMap<String, String> body =
+                new LinkedMultiValueMap<>();
+
+        body.add("target_id_type", "user_id");
+        body.add("target_id", providerId);
+
+        restClient.post()
+                .uri(unlinkUri)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .header("Authorization", "KakaoAK " + adminKey)
+                .body(body)
+                .retrieve()
+                .toBodilessEntity();
     }
 }

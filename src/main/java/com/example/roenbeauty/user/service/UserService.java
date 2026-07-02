@@ -141,6 +141,11 @@ public class UserService {
 
         reservations.forEach(Reservation::anonymizeCustomerInfo);
 
+        if (user.getProvider() == OAuthProvider.KAKAO
+                && user.getProviderId() != null) {
+            kakaoClient.unlinkByAdminKey(user.getProviderId());
+        }
+
         user.withdraw();
     }
 
