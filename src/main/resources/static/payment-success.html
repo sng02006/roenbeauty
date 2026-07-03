@@ -67,7 +67,7 @@ p {
             결제 승인 요청을 처리하고 있습니다.
         </p>
 
-        <a href="/my-reservations.html" class="btn">
+        <a href="/my-reservations.html" id="reservationBtn" class="btn" style="display:none;">
             내 예약 보기
         </a>
     </div>
@@ -117,6 +117,8 @@ p {
             예약 요청이 정상적으로 접수되었습니다.<br><br>
             관리자 확인 후 예약이 확정됩니다.
             `;
+
+        document.getElementById("reservationBtn").style.display = "inline-block";
 
     } catch (e) {
 
