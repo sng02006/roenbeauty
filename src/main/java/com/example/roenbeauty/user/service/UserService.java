@@ -139,12 +139,33 @@ public class UserService {
         List<Reservation> reservations =
                 reservationRepository.findAllByUser_Id(user.getId());
 
-        reservations.forEach(Reservation::anonymizeCustomerInfo);
+        reservations.forEach(reservation -> reservation.anonymizeCustomerInfo());
 
         if (user.getProvider() == OAuthProvider.KAKAO
                 && user.getProviderId() != null) {
             kakaoClient.unlinkByAdminKey(user.getProviderId());
         }
+
+        user.withdraw();
+    }
+
+    @Transactional
+    public void kakaoUnlinkCallback(String providerId) {
+        User user = userRepository
+                .findByProviderAndProviderIdAndDeletedFalse(
+                        OAuthProvider.KAKAO,
+                        providerId
+                )
+                .orElse(null);
+
+        if (user == null) {
+            return;
+        }
+
+        List<Reservation> reservations =
+                reservationRepository.findAllByUser_Id(user.getId());
+
+        reservations.forEach(reservation -> reservation.anonymizeCustomerInfo());
 
         user.withdraw();
     }

@@ -9,6 +9,7 @@ import com.example.roenbeauty.user.dto.SignupRequestDto;
 import com.example.roenbeauty.user.dto.UserInfoResponseDto;
 import com.example.roenbeauty.user.service.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +52,17 @@ public class UserController {
             @RequestBody PasswordChangeRequestDto requestDto
     ) {
         userService.changePassword(authUser, requestDto);
+    }
+
+    @PostMapping(
+            value = "/kakao/unlink",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+    )
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void kakaoUnlinkCallback(
+            @RequestParam("user_id") String userId
+    ) {
+        userService.kakaoUnlinkCallback(userId);
     }
 
     @DeleteMapping("/me")

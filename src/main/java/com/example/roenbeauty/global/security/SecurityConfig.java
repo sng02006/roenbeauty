@@ -67,6 +67,9 @@ public class SecurityConfig {
                                 "/api/users/kakao/login"
                         ).permitAll()
 
+                        // 카카오 계정 연결 해제
+                        .requestMatchers(HttpMethod.POST, "/api/users/kakao/unlink").permitAll()
+
                         // 공개 조회 API
                         .requestMatchers(HttpMethod.GET, "/api/menus").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/menus/category/**").permitAll()
