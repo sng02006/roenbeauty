@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ReservationService {
@@ -66,55 +67,58 @@ public class ReservationService {
             AuthUser authUser,
             ReservationCreateRequestDto requestDto
     ) {
-    Menu menu = menuRepository.findById(requestDto.getMenuId())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
+        Menu menu = menuRepository.findById(requestDto.getMenuId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메뉴입니다."));
 
-    User user = userRepository.findById(authUser.getUserId())
-            .orElseThrow(() -> new RuntimeException("유저 없음"));
+        User user = userRepository.findById(authUser.getUserId())
+                .orElseThrow(() -> new RuntimeException("유저 없음"));
 
-    validateReservationDate(requestDto.getReservationDate());
+        validateReservationDate(requestDto.getReservationDate());
 
-    validateReservationTime(
-            requestDto.getReservationDate(),
-            requestDto.getReservationTime(),
-            menu.getDurationMinutes()
-    );
+        validateReservationTime(
+                requestDto.getReservationDate(),
+                requestDto.getReservationTime(),
+                menu.getDurationMinutes()
+        );
 
-    Reservation reservation = new Reservation(
-            requestDto.getName(),
-            requestDto.getPhone(),
-            requestDto.getReservationDate(),
-            requestDto.getReservationTime(),
-            menu.getName(),
-            requestDto.getRequestMemo(),
-            ReservationStatus.WAITING_PAYMENT,
-            menu.getDurationMinutes(),
-            user
-    );
+        Reservation reservation = new Reservation(
+                requestDto.getName(),
+                requestDto.getPhone(),
+                requestDto.getReservationDate(),
+                requestDto.getReservationTime(),
+                menu.getName(),
+                requestDto.getRequestMemo(),
+                ReservationStatus.WAITING_PAYMENT,
+                menu.getDurationMinutes(),
+                user
+        );
 
-    Reservation savedReservation = reservationRepository.save(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
-    String orderId = "reservation-" + savedReservation.getId();
-    String orderName = "Ro:en Beauty 예약금";
-    int paymentAmount = calculateDepositAmount(savedReservation.getReservationTime());
+        String orderId = "reservation-"
+                + savedReservation.getId()
+                + "-"
+                + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String orderName = "Ro:en Beauty 예약금";
+        int paymentAmount = calculateDepositAmount(savedReservation.getReservationTime());
 
-    Payment payment = new Payment(
-            savedReservation,
-            orderId,
-            paymentAmount
-    );
+        Payment payment = new Payment(
+                savedReservation,
+                orderId,
+                paymentAmount
+        );
 
-    Payment savedPayment = paymentRepository.save(payment);
+        Payment savedPayment = paymentRepository.save(payment);
 
-    return new CheckoutResponseDto(
-            savedReservation.getId(),
-            savedPayment.getId(),
-            savedPayment.getOrderId(),
-            orderName,
-            savedPayment.getAmount(),
-            savedReservation.getName(),
-            savedReservation.getUser().getEmail()
-    );
+        return new CheckoutResponseDto(
+                savedReservation.getId(),
+                savedPayment.getId(),
+                savedPayment.getOrderId(),
+                orderName,
+                savedPayment.getAmount(),
+                savedReservation.getName(),
+                savedReservation.getUser().getEmail()
+        );
     }
 
     @Transactional(readOnly = true)
